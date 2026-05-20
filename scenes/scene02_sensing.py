@@ -56,7 +56,7 @@ class Scene02Sensing(Scene):
         self.play(FadeIn(title, shift=UP * 0.3))
         self.play(FadeIn(subtitle, shift=UP * 0.2))
 
-        self.wait(1.5)
+        self.wait(4.46)
         self.play(FadeOut(group))
 
     def offline_vs_livescan(self):
@@ -108,11 +108,11 @@ class Scene02Sensing(Scene):
         arrow_label = self.create_text("Phát triển", font_size=14, color=PRIMARY).next_to(arrow, UP, buff=0.1)
 
         self.play(FadeIn(offline_group, shift=RIGHT * 0.3))
-        self.wait(1.5)
+        self.wait(7.66)
         self.play(GrowArrow(arrow), FadeIn(arrow_label))
         self.play(FadeIn(livescan_group, shift=LEFT * 0.3))
 
-        self.wait(2.5)
+        self.wait(6.43)
         self.play(FadeOut(VGroup(section, both, arrow, arrow_label)))
 
     def ftir_principle(self):
@@ -196,21 +196,27 @@ class Scene02Sensing(Scene):
         # Chạy animation
         self.play(Create(prism), FadeIn(prism_label))
         self.play(FadeIn(finger_group), FadeIn(finger_label))
+        self.wait(11.06)
+        
         self.play(
             GrowArrow(valley_arrow), FadeIn(valley_label),
             GrowArrow(ridge_arrow), FadeIn(ridge_label)
         )
-        self.wait(1.5)
+        self.wait(4.94)
+        
         self.play(FadeIn(light_source), FadeIn(ccd_sensor))
+        self.wait(2.81)
         
         # Animate tia sáng
         self.play(Create(ray_valley), run_time=1.5)
-        self.wait(0.5)
+        self.wait(3.43)
+        
         self.play(Create(ray_ridge), run_time=1.2)
         self.play(Create(scatter_rays), Create(cross))
-        self.wait(1.0)
+        self.wait(2.86)
+        
         self.play(FadeIn(explanation, shift=UP * 0.2))
-        self.wait(3.5)
+        self.wait(5.90)
 
         # Xóa
         self.play(FadeOut(Group(*self.mobjects)))
@@ -272,7 +278,7 @@ class Scene02Sensing(Scene):
             run_time=2,
         )
 
-        self.wait(4.0)
+        self.wait(18.07)
         self.play(FadeOut(VGroup(section, cards)))
 
     def new_tech_and_challenges(self):
@@ -316,8 +322,8 @@ class Scene02Sensing(Scene):
         both = VGroup(left_group, right_group).arrange(RIGHT, buff=0.6).shift(DOWN * 0.3)
 
         self.play(FadeIn(left_group, shift=RIGHT * 0.3))
-        self.wait(1.5)
+        self.wait(6.10)
         self.play(FadeIn(right_group, shift=LEFT * 0.3))
 
-        self.wait(4.0)
+        self.wait(9.19)
         self.play(FadeOut(VGroup(section, both)))

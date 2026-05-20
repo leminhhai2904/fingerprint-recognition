@@ -68,7 +68,7 @@ class Scene01Intro(Scene):
         )
         self.play(FadeIn(subtitle, shift=UP * 0.2))
 
-        self.wait(1)
+        self.wait(3.35)
         self.play(
             FadeOut(VGroup(title, top_label, lines, subtitle, fp_icon)),
             run_time=1,
@@ -145,7 +145,7 @@ class Scene01Intro(Scene):
         )
         self.play(FadeIn(desc, shift=UP * 0.2))
 
-        self.wait(1)
+        self.wait(1.53)
         self.play(FadeOut(VGroup(
             section, ridges_group, ridge_arrow, ridge_label,
             valley_arrow, valley_label, desc,
@@ -184,15 +184,14 @@ class Scene01Intro(Scene):
 
         cards.arrange(RIGHT, buff=0.5).shift(DOWN * 0.3)
 
-        self.play(
-            LaggedStart(
-                *[FadeIn(card, shift=UP * 0.5, scale=0.9) for card in cards],
-                lag_ratio=0.3,
-            ),
-            run_time=2,
-        )
+        # Hiện từng thẻ khớp với tiếng nói
+        self.play(FadeIn(cards[0], shift=UP * 0.5, scale=0.9))
+        self.wait(3.50)
+        self.play(FadeIn(cards[1], shift=UP * 0.5, scale=0.9))
+        self.wait(2.70)
+        self.play(FadeIn(cards[2], shift=UP * 0.5, scale=0.9))
+        self.wait(2.46)
 
-        self.wait(1)
         self.play(FadeOut(VGroup(section, cards)))
 
     def fingerprint_patterns(self):
@@ -233,15 +232,14 @@ class Scene01Intro(Scene):
 
         cards.arrange(RIGHT, buff=0.8).shift(DOWN * 0.2)
 
-        self.play(
-            LaggedStart(
-                *[FadeIn(card, shift=UP * 0.5) for card in cards],
-                lag_ratio=0.4,
-            ),
-            run_time=3,
-        )
+        # Hiện từng loại vân tay khớp với tiếng nói
+        self.play(FadeIn(cards[0], shift=UP * 0.5))
+        self.wait(2.50)
+        self.play(FadeIn(cards[1], shift=UP * 0.5))
+        self.wait(1.20)
+        self.play(FadeIn(cards[2], shift=UP * 0.5))
+        self.wait(2.56)
 
-        self.wait(2)
         self.play(FadeOut(VGroup(section, cards)))
 
     def history_timeline(self):
@@ -266,7 +264,10 @@ class Scene01Intro(Scene):
         dots = VGroup()
         labels = VGroup()
 
-        for x, year, desc, color in events:
+        # Thời gian chờ ngắn giữa mỗi mốc (audio đọc liên tục)
+        event_wait_times = [0.4, 0.4, 0.4, 0.4, 0.4]
+
+        for i, (x, year, desc, color) in enumerate(events):
             dot = Dot(point=np.array([x, -0.2, 0]), color=color, radius=0.1)
             year_label = Text(year, font_size=36, color=color, weight=BOLD).scale(18 / 36)
             year_label.next_to(dot, UP, buff=0.25)
@@ -291,14 +292,14 @@ class Scene01Intro(Scene):
             )
             dots.add(dot, tick)
             labels.add(year_label, desc_label)
+            self.wait(event_wait_times[i])
 
         modern_note = Text(
             "Ngày nay: Hơn 200 triệu bản ghi vân tay tại FBI",
             font_size=36, color=RIDGE_COLOR,
         ).scale(18 / 36).to_edge(DOWN, buff=0.8)
         self.play(FadeIn(modern_note, shift=UP * 0.2))
-        self.wait(2)
+        self.wait(4.02)
 
         self.play(FadeOut(VGroup(section, timeline_line, dots, labels, modern_note)))
-        self.wait(0.5)
-        
+        self.wait(0.3)
