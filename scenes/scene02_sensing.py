@@ -1,7 +1,7 @@
 """
-Scene 2: Thu nhận vân tay (Fingerprint Sensing) (Không có giọng nói trực tiếp trong manim, nhưng có kịch bản ghi âm riêng)
+Scene 2: Thu nhận vân tay (Fingerprint Sensing)
 - So sánh thu nhận ngoại tuyến (Off-line) vs quét trực tiếp (Live-scan)
-- Nguyên lý cảm biến quang học: Phản xạ toàn phần bị chặn (FTIR)
+- Nguyên lý cảm biến quang học: Phản xạ toàn phần bị chặn (FTIR) + Trích hạt sáng
 - So sánh 3 công nghệ cảm biến: Quang học (Optical), Bán dẫn (Solid-state), Siêu âm (Ultrasound)
 - Thách thức & Công nghệ tương lai (Quét đa phổ, Quét 3D không tiếp xúc, Quy chuẩn FBI CJIS)
 """
@@ -14,6 +14,7 @@ from utils.colors import *
 from utils.styles import *
 from utils.fingerprint_mobjects import *
 
+
 class Scene02Sensing(Scene):
     def construct(self):
         scene_setup(self)
@@ -23,17 +24,12 @@ class Scene02Sensing(Scene):
         self.sensor_comparison()
         self.new_tech_and_challenges()
 
-    def create_text(self, text_str, font_size=18, color=TEXT_COLOR, weight=NORMAL, **kwargs):
-        # We render it at font_size=36 and then scale it down to the desired size.
-        # This resolves kerning issues in CMU Serif font on Windows.
+    def ct(self, text_str, font_size=18, color=TEXT_COLOR, weight=NORMAL, **kwargs):
+        """create_text with CMU Serif kerning workaround (render big → scale down)."""
         return Text(text_str, font_size=36, color=color, weight=weight, **kwargs).scale(font_size / 36)
 
-    def create_paragraph(self, *lines, font_size=18, color=TEXT_COLOR, **kwargs):
-        # Paragraph version of the workaround
-        return Paragraph(*lines, font_size=36, color=color, **kwargs).scale(font_size / 36)
-
     def get_section_title(self, text):
-        title = Text(text, font_size=40, color=TEXT_BRIGHT, weight=BOLD).scale(30 / 40)
+        title = self.ct(text, font_size=30, color=TEXT_BRIGHT, weight=BOLD)
         underline = Line(
             start=title.get_left() + DOWN * 0.3,
             end=title.get_right() + DOWN * 0.3,
@@ -43,27 +39,26 @@ class Scene02Sensing(Scene):
         return VGroup(title, underline)
 
     def section_title(self):
-        """Tiêu đề mục."""
-        num = self.create_text("01", font_size=80, color=PRIMARY, weight=BOLD, font="Consolas")
-        title = self.create_text("Thu Nhận Vân Tay", font_size=44, color=TEXT_BRIGHT, weight=BOLD)
-        subtitle = self.create_text(
-            "Làm thế nào để số hóa cấu trúc đường vân?",
-            font_size=22, color=TEXT_DIM,
-        )
+        """Tiêu đề mục — Segment 1 = 4.87s."""
+        num = self.ct("01", font_size=80, color=PRIMARY, weight=BOLD, font="Consolas")
+        title = self.ct("Thu Nhận Vân Tay", font_size=44, color=TEXT_BRIGHT, weight=BOLD)
+        subtitle = self.ct("Làm thế nào để số hóa cấu trúc đường vân?", font_size=22, color=TEXT_DIM)
         group = VGroup(num, title, subtitle).arrange(DOWN, buff=0.4)
 
         self.play(FadeIn(num, scale=1.5), run_time=0.5)
-        self.play(FadeIn(title, shift=UP * 0.3))
-        self.play(FadeIn(subtitle, shift=UP * 0.2))
+        self.play(FadeIn(title, shift=UP * 0.3), run_time=1.0)
+        self.play(FadeIn(subtitle, shift=UP * 0.2), run_time=1.0)
 
-        self.wait(2.73)  # seg1=5.93s (+0.3s)
-        self.play(FadeOut(group))
+        # Total anim play = 2.5s. Target 4.87s before FadeOut completes.
+        self.wait(1.37)
+        self.play(FadeOut(group), run_time=1.0)
+        self.wait(0.8) # Silence gap
 
     def offline_vs_livescan(self):
-        """So sánh phương pháp offline (mực) và live-scan."""
+        """So sánh phương pháp offline (mực) và live-scan — Segment 2 = 11.83s."""
         section = self.get_section_title("Phương pháp thu nhận vân tay")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3))
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
         # Phương pháp offline (trái)
         offline_box = create_rounded_box(
@@ -71,12 +66,12 @@ class Scene02Sensing(Scene):
             fill_color=SECONDARY, fill_opacity=0.2,
             stroke_color=TEXT_DIM, stroke_width=1.5,
         )
-        offline_title = self.create_text("Thu nhận Ngoại tuyến", font_size=20, color=TEXT_DIM, weight=BOLD)  # Removed parentheses
-        offline_subtitle = self.create_text("Kỹ thuật lăn mực truyền thống", font_size=14, color=TEXT_DIM)
+        offline_title = self.ct("Thu nhận Ngoại tuyến", font_size=20, color=TEXT_DIM, weight=BOLD)
+        offline_subtitle = self.ct("Kỹ thuật lăn mực truyền thống", font_size=14, color=TEXT_DIM)
         offline_steps = VGroup(
-            self.create_text("1. Phủ mực đen lên đầu ngón tay", font_size=14, color=TEXT_DIM),
-            self.create_text("2. Ấn ngón tay lên thẻ giấy chuyên dụng", font_size=14, color=TEXT_DIM),
-            self.create_text("3. Quét thẻ giấy bằng máy quét phẳng", font_size=14, color=TEXT_DIM),
+            self.ct("1. Phủ mực đen lên đầu ngón tay", font_size=14, color=TEXT_DIM),
+            self.ct("2. Ấn ngón tay lên thẻ giấy chuyên dụng", font_size=14, color=TEXT_DIM),
+            self.ct("3. Quét thẻ giấy bằng máy quét phẳng", font_size=14, color=TEXT_DIM),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.25)
         offline_content = VGroup(offline_title, offline_subtitle, offline_steps).arrange(DOWN, buff=0.3)
         offline_group = VGroup(offline_box, offline_content)
@@ -88,38 +83,40 @@ class Scene02Sensing(Scene):
             fill_color=SECONDARY, fill_opacity=0.3,
             stroke_color=PRIMARY, stroke_width=2,
         )
-        livescan_title = self.create_text("Thu nhận Trực tiếp", font_size=20, color=PRIMARY, weight=BOLD)  # Removed parentheses
-        livescan_subtitle = self.create_text("Công nghệ quét điện tử hiện đại", font_size=14, color=PRIMARY)
+        livescan_title = self.ct("Thu nhận Trực tiếp", font_size=20, color=PRIMARY, weight=BOLD)
+        livescan_subtitle = self.ct("Công nghệ quét điện tử hiện đại", font_size=14, color=PRIMARY)
         livescan_steps = VGroup(
-            self.create_text("1. Đặt ngón tay trực tiếp lên cảm biến", font_size=14, color=TEXT_COLOR),
-            self.create_text("2. Cảm biến quét và số hóa trực tiếp", font_size=14, color=TEXT_COLOR),
-            self.create_text("3. Không cần mực, cho ảnh số tức thì", font_size=14, color=CORE_POINT),
+            self.ct("1. Đặt ngón tay trực tiếp lên cảm biến", font_size=14, color=TEXT_COLOR),
+            self.ct("2. Cảm biến quét và số hóa trực tiếp", font_size=14, color=TEXT_COLOR),
+            self.ct("3. Không cần mực, cho ảnh số tức thì", font_size=14, color=CORE_POINT),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.25)
         livescan_content = VGroup(livescan_title, livescan_subtitle, livescan_steps).arrange(DOWN, buff=0.3)
         livescan_group = VGroup(livescan_box, livescan_content)
         livescan_content.move_to(livescan_box)
 
-        both = VGroup(offline_group, livescan_group).arrange(RIGHT, buff=1.2).shift(DOWN * 0.3)  # Increased buffer space
+        both = VGroup(offline_group, livescan_group).arrange(RIGHT, buff=1.2).shift(DOWN * 0.3)
 
         arrow = Arrow(
             offline_box.get_right(), livescan_box.get_left(),
-            color=PRIMARY, stroke_width=3, buff=0.3,  # Increased buffer to avoid overlap
+            color=PRIMARY, stroke_width=3, buff=0.3,
         )
-        arrow_label = self.create_text("Phát triển", font_size=14, color=PRIMARY).next_to(arrow, UP, buff=0.2)  # Adjusted label position
+        arrow_label = self.ct("Phát triển", font_size=14, color=PRIMARY).next_to(arrow, UP, buff=0.2)
 
-        self.play(FadeIn(offline_group, shift=RIGHT * 0.3))
-        self.wait(3.0)  # Đọc đoạn offline trước khi livescan xuất hiện
-        self.play(GrowArrow(arrow), FadeIn(arrow_label))
-        self.play(FadeIn(livescan_group, shift=LEFT * 0.3))
+        self.play(FadeIn(offline_group, shift=RIGHT * 0.3), run_time=0.8)
+        self.wait(3.5)  # Đọc đoạn offline
+        self.play(GrowArrow(arrow), FadeIn(arrow_label), run_time=0.8)
+        self.play(FadeIn(livescan_group, shift=LEFT * 0.3), run_time=0.8)
 
-        self.wait(5.14)  # seg2=11.64s (+0.9s)
-        self.play(FadeOut(VGroup(section, both, arrow, arrow_label)))
+        # Target 11.83s. Total play so far = 0.6 + 0.8 + 3.5 + 0.8 + 0.8 = 6.5s.
+        self.wait(4.33)
+        self.play(FadeOut(VGroup(section, both, arrow, arrow_label)), run_time=1.0)
+        self.wait(0.8) # Silence gap
 
     def ftir_principle(self):
-        """Minh họa nguyên lý FTIR."""
+        """Minh họa nguyên lý FTIR — Segment 3 = 17.64s."""
         section = self.get_section_title("Cảm biến quang học: Nguyên lý FTIR")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3))
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
         # Vẽ lăng kính
         prism_points = [
@@ -133,7 +130,7 @@ class Scene02Sensing(Scene):
             fill_color="#3a506b", fill_opacity=0.3,
             stroke_color=RIDGE_COLOR, stroke_width=2,
         )
-        prism_label = self.create_text("Lăng kính thủy tinh", font_size=16, color=TEXT_DIM).next_to(prism, DOWN, buff=0.2)
+        prism_label = self.ct("Lăng kính thủy tinh", font_size=16, color=TEXT_DIM).next_to(prism, DOWN, buff=0.2)
 
         # Ngón tay
         skin_points = []
@@ -143,7 +140,7 @@ class Scene02Sensing(Scene):
         
         skin = VMobject()
         skin.set_points_smoothly(skin_points)
-        skin.set_stroke(color="#d4a574", width=4) # Màu da ngón tay
+        skin.set_stroke(color="#d4a574", width=4)
 
         finger_body = Polygon(
             *skin_points,
@@ -153,30 +150,29 @@ class Scene02Sensing(Scene):
             stroke_width=0
         )
         finger_group = VGroup(finger_body, skin)
-        finger_label = self.create_text("Đầu ngón tay", font_size=16, color="#d4a574").move_to([0, 1.7, 0])
+        finger_label = self.ct("Đầu ngón tay", font_size=16, color="#d4a574").move_to([0, 1.7, 0])
 
-        # Nhãn mô tả trạng thái tiếp xúc
-        valley_label = self.create_text("Rãnh - Không tiếp xúc", font_size=13, color=TEXT_DIM).move_to([-1.5, 1.1, 0])
+        valley_label = self.ct("Rãnh - Không tiếp xúc", font_size=13, color=TEXT_DIM).move_to([-1.5, 1.1, 0])
         valley_arrow = Arrow(
-            start=[-1.6, 0.95, 0], end=[-1.275, 0.775, 0],  # Adjusted end point for better alignment
+            start=[-1.6, 0.95, 0], end=[-1.275, 0.775, 0],
             color=TEXT_DIM, stroke_width=1.5, max_tip_length_to_length_ratio=0.15
         )
         
-        ridge_label = self.create_text("Đường vân - Tiếp xúc", font_size=13, color=RIDGE_COLOR).move_to([1.5, 1.1, 0])
+        ridge_label = self.ct("Đường vân - Tiếp xúc", font_size=13, color=RIDGE_COLOR).move_to([1.5, 1.1, 0])
         ridge_arrow = Arrow(
-            start=[1.0, 0.95, 0], end=[0.8, 0.55, 0],  # Adjusted end point for better alignment
+            start=[1.0, 0.95, 0], end=[0.8, 0.55, 0],
             color=RIDGE_COLOR, stroke_width=1.5, max_tip_length_to_length_ratio=0.15
         )
 
         # Thiết bị
         light_source = VGroup(
             Dot([-3.5, -0.75, 0], color=OPTICAL_COLOR, radius=0.15),
-            self.create_text("Nguồn sáng", font_size=14, color=OPTICAL_COLOR)
+            self.ct("Nguồn sáng", font_size=14, color=OPTICAL_COLOR)
         ).arrange(DOWN, buff=0.15).move_to([-3.8, -0.75, 0])
 
         ccd_sensor = VGroup(
             create_rounded_box(width=0.4, height=1.5, fill_color=CORE_POINT, fill_opacity=0.2, stroke_color=CORE_POINT, stroke_width=1.5),
-            self.create_text("Cảm biến CCD/CMOS", font_size=14, color=CORE_POINT)
+            self.ct("Cảm biến CCD/CMOS", font_size=14, color=CORE_POINT)
         ).arrange(DOWN, buff=0.15).move_to([3.8, -0.5, 0])
 
         # Tia sáng
@@ -195,41 +191,49 @@ class Scene02Sensing(Scene):
         cross = Cross(scale_factor=0.08, stroke_color=MINUTIA_TERM).move_to([0, 0.5, 0])
 
         explanation = VGroup(
-            self.create_text("Tại rãnh: Phản xạ toàn phần → Cảm biến nhận sáng → Tạo vùng SÁNG", font_size=15, color=OPTICAL_COLOR),
-            self.create_text("Tại đường vân: Phản xạ bị chặn → Ánh sáng bị hấp thụ/tán xạ → Tạo vùng TỐI", font_size=15, color=MINUTIA_TERM)
+            self.ct("Tại rãnh: Phản xạ toàn phần → Cảm biến nhận sáng → Tạo vùng SÁNG", font_size=15, color=OPTICAL_COLOR),
+            self.ct("Tại đường vân: Phản xạ bị chặn → Ánh sáng bị hấp thụ/tán xạ → Tạo vùng TỐI", font_size=15, color=MINUTIA_TERM)
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).to_edge(DOWN, buff=0.4)
-        self.wait(0.5)  # Pause before prism appears
 
-        # Chạy animation
-        self.play(Create(prism), FadeIn(prism_label), FadeIn(finger_group), FadeIn(finger_label), run_time=1.5)
-        self.wait(1.0)  # Thời gian ngắn khi lăng kính hiện ra
+        self.play(Create(prism), FadeIn(prism_label), FadeIn(finger_group), FadeIn(finger_label), run_time=1.2)
+        self.wait(0.5)
 
         self.play(
             GrowArrow(valley_arrow), FadeIn(valley_label),
             FadeIn(light_source), FadeIn(ccd_sensor),
-            run_time=1.5
+            run_time=1.2
         )
+        self.play(GrowArrow(ridge_arrow), FadeIn(ridge_label), run_time=0.8)
 
+        # Trace photons along the rays (Premium effect)
+        photon_valley = Dot(color=OPTICAL_COLOR, radius=0.08)
+        photon_ridge = Dot(color=OPTICAL_COLOR, radius=0.08)
+
+        self.play(Create(ray_valley), run_time=1.0)
+        self.play(MoveAlongPath(photon_valley, ray_valley), run_time=1.2, rate_func=smooth)
+        self.play(FadeOut(photon_valley), run_time=0.2)
+
+        self.play(Create(ray_ridge), run_time=1.0)
+        self.play(MoveAlongPath(photon_ridge, ray_ridge), run_time=0.8, rate_func=smooth)
         self.play(
-            GrowArrow(ridge_arrow), FadeIn(ridge_label),
-            run_time=1.0
+            Create(scatter_rays), Create(cross),
+            FadeOut(photon_ridge),
+            run_time=0.8
         )
-        self.play(Create(ray_valley), run_time=1.2)
-        self.play(Create(ray_ridge), run_time=1.2)
-        self.play(Create(scatter_rays), Create(cross))
-        self.wait(1.3)  # Sau khi tia sáng xuất hiện
+        self.wait(0.5)
 
-        self.play(FadeIn(explanation, shift=UP * 0.2))
-        self.wait(3.48)  # seg3=15.98s (+1.0s)
+        self.play(FadeIn(explanation, shift=UP * 0.2), run_time=0.8)
 
-        # Clear the scene
-        self.play(FadeOut(Group(*self.mobjects)))
+        # Target 17.64s. Total play so far = 1.2 + 0.5 + 1.2 + 0.8 + 1.0 + 1.2 + 0.2 + 1.0 + 0.8 + 0.8 + 0.5 + 0.8 = 10.0s.
+        self.wait(6.64)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+        self.wait(0.8) # Silence gap
 
     def sensor_comparison(self):
-        """So sánh ba loại cảm biến."""
+        """So sánh ba loại cảm biến — Segment 4 = 23.23s."""
         section = self.get_section_title("Ba dòng công nghệ cảm biến chính")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3))
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
         sensors = [
             ("Cảm biến Quang học", OPTICAL_COLOR, [
@@ -256,35 +260,33 @@ class Scene02Sensing(Scene):
                 fill_color=color, fill_opacity=0.08,
                 stroke_color=color, stroke_width=1.5,
             )
-            title = self.create_text(name, font_size=20, color=color, weight=BOLD)
-            
+            title = self.ct(name, font_size=20, color=color, weight=BOLD)
             desc_group = VGroup(*[
-                self.create_text(line, font_size=13, color=TEXT_COLOR)
+                self.ct(line, font_size=13, color=TEXT_COLOR)
                 for line in desc_lines
             ]).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
-            
             content = VGroup(title, desc_group).arrange(DOWN, buff=0.3)
             content.move_to(card_box)
             cards.add(VGroup(card_box, content))
 
         cards.arrange(RIGHT, buff=0.35).shift(DOWN * 0.3)
 
-        self.play(
-            LaggedStart(
-                *[FadeIn(c, shift=UP * 0.5) for c in cards],
-                lag_ratio=0.3,
-            ),
-            run_time=2,
-        )
+        # Target = 23.23s.
+        self.play(FadeIn(cards[0], shift=UP * 0.5), run_time=0.8)
+        self.wait(3.5)
+        self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.8)
+        self.wait(6.5)
+        self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.8)
+        self.wait(9.23)
 
-        self.wait(7.61)  # seg4=10.61s, anims~2s+FadeOut~1s → wait=7.61s
-        self.play(FadeOut(VGroup(section, cards)))
+        self.play(FadeOut(VGroup(section, cards)), run_time=1.0)
+        self.wait(0.8) # Silence gap
 
     def new_tech_and_challenges(self):
-        """Thách thức và công nghệ mới."""
+        """Thách thức và công nghệ mới — Segment 5 = 15.31s."""
         section = self.get_section_title("Thách thức & Hướng phát triển mới")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3))
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
         # Khối bên trái: Thách thức (Challenges)
         left_box = create_rounded_box(
@@ -292,11 +294,11 @@ class Scene02Sensing(Scene):
             fill_color=SECONDARY, fill_opacity=0.2,
             stroke_color=DELTA_COLOR, stroke_width=1.5,
         )
-        left_title = self.create_text("Hạn chế của máy quét hiện tại", font_size=18, color=DELTA_COLOR, weight=BOLD)
+        left_title = self.ct("Hạn chế của máy quét hiện tại", font_size=18, color=DELTA_COLOR, weight=BOLD)
         left_points = VGroup(
-            self.create_text("Khó hoạt động khi ngón tay quá khô hoặc ướt", font_size=13, color=TEXT_COLOR),
-            self.create_text("Biến dạng da do lực ép ngón tay", font_size=13, color=TEXT_COLOR),
-            self.create_text("Nguy cơ bị đánh lừa bởi vân tay giả", font_size=13, color=TEXT_COLOR),
+            self.ct("Khó hoạt động khi ngón tay quá khô hoặc ướt", font_size=13, color=TEXT_COLOR),
+            self.ct("Biến dạng da do lực ép ngón tay", font_size=13, color=TEXT_COLOR),
+            self.ct("Nguy cơ bị đánh lừa bởi vân tay giả", font_size=13, color=TEXT_COLOR),
         ).arrange(DOWN, buff=0.2)
         left_content = VGroup(left_title, left_points).arrange(DOWN, buff=0.35)
         left_content.move_to(left_box)
@@ -308,11 +310,11 @@ class Scene02Sensing(Scene):
             fill_color=SECONDARY, fill_opacity=0.3,
             stroke_color=MATCH_COLOR, stroke_width=1.5,
         )
-        right_title = self.create_text("Giải pháp công nghệ tương lai", font_size=18, color=MATCH_COLOR, weight=BOLD)
+        right_title = self.ct("Giải pháp công nghệ tương lai", font_size=18, color=MATCH_COLOR, weight=BOLD)
         right_points = VGroup(
-            self.create_text("Quét đa phổ: Đọc vân dưới biểu bì", font_size=13, color=TEXT_COLOR),
-            self.create_text("Quét 3D không tiếp xúc: Loại bỏ biến dạng cơ học", font_size=13, color=TEXT_COLOR),
-            self.create_text("Tiêu chuẩn FBI CJIS: Chuẩn hóa chất lượng ảnh AFIS", font_size=13, color=TEXT_COLOR),
+            self.ct("Quét đa phổ: Đọc vân dưới biểu bì", font_size=13, color=TEXT_COLOR),
+            self.ct("Quét 3D không tiếp xúc: Loại bỏ biến dạng cơ học", font_size=13, color=TEXT_COLOR),
+            self.ct("Tiêu chuẩn FBI CJIS: Chuẩn hóa chất lượng ảnh AFIS", font_size=13, color=TEXT_COLOR),
         ).arrange(DOWN, buff=0.2)
         right_content = VGroup(right_title, right_points).arrange(DOWN, buff=0.35)
         right_content.move_to(right_box)
@@ -320,9 +322,10 @@ class Scene02Sensing(Scene):
 
         both = VGroup(left_group, right_group).arrange(RIGHT, buff=0.6).shift(DOWN * 0.3)
 
-        self.play(FadeIn(left_group, shift=RIGHT * 0.3))
-        self.wait(3.85)  # seg5=12.55s wait_before: +0.35s
-        self.play(FadeIn(right_group, shift=LEFT * 0.3))
+        self.play(FadeIn(left_group, shift=RIGHT * 0.3), run_time=0.8)
+        self.wait(5.0)
+        self.play(FadeIn(right_group, shift=LEFT * 0.3), run_time=0.8)
 
-        self.wait(5.75)  # seg5=12.55s wait_after: +0.7s
-        self.play(FadeOut(VGroup(section, both)))
+        # Target = 15.31s. Total play so far = 0.6 + 0.8 + 5.0 + 0.8 = 7.2s.
+        self.wait(7.11)
+        self.play(FadeOut(VGroup(section, both)), run_time=1.0)

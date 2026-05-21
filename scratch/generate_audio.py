@@ -117,7 +117,7 @@ def main():
     parser = argparse.ArgumentParser(description="Generate high-quality Vietnamese TTS voiceover segments and concatenate them.")
     parser.add_argument("script_path", help="Path to the script text file (e.g., dist/script_scene01.txt)")
     parser.add_argument("--voice", default="vi-VN-NamMinhNeural", help="Voice model (default: vi-VN-NamMinhNeural)")
-    parser.add_argument("--rate", default="+0%", help="Speaking rate adjustment (e.g. +15%%, +25%%). Default: +0%%")
+    parser.add_argument("--rate", default="+23%", help="Speaking rate adjustment (e.g. +15%%, +25%%). Default: +23%")
     parser.add_argument("--silence-gap", type=float, default=0.8, help="Silence gap between segments in seconds (default: 0.8)")
     
     args = parser.parse_args()

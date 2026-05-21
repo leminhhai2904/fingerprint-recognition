@@ -1,9 +1,9 @@
 """
-Scene 7: Kết luận (Không có giọng nói)
-- Tóm tắt pipeline
-- Đánh giá hiệu suất (FVC)
-- Các thách thức còn mở
-- Outro
+Scene 7: Tóm tắt & Kết luận (Conclusion)
+- Tóm tắt quy trình (Recap Pipeline) + Vòng xung thành công nháy xanh lá
+- So sánh các hệ thống thương mại (FVC, NIST, FBI)
+- Đóng góp khoa học và tương lai
+- Lời cảm ơn & Kết thúc + Vẽ vân tay nền
 """
 from manim import *
 import numpy as np
@@ -18,194 +18,179 @@ from utils.fingerprint_mobjects import *
 class Scene07Conclusion(Scene):
     def construct(self):
         scene_setup(self)
+        self.section_title()
         self.pipeline_recap()
-        self.performance()
-        self.open_issues()
+        self.evaluation_standards()
         self.outro()
 
-    def pipeline_recap(self):
-        """Tóm tắt toàn bộ pipeline nhận dạng vân tay."""
-        section = get_section_title("Bức tranh toàn cảnh")
-        section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3))
+    def ct(self, text_str, font_size=18, color=TEXT_COLOR, weight=NORMAL, **kwargs):
+        """create_text with CMU Serif kerning workaround (render big → scale down)."""
+        return Text(text_str, font_size=36, color=color, weight=weight, **kwargs).scale(font_size / 36)
 
-        stages = [
-            ("Thu nhận", "📷", CHART_BLUE, "Chụp ảnh vân tay\nbằng cảm biến\nquang học/bán dẫn"),
-            ("Trích xuất\nĐặc trưng", "🔍", CHART_ORANGE, "Trích xuất minutiae\nm = {x, y, θ}\ntừ mẫu đường vân"),
-            ("Đối sánh", "🔗", CHART_PURPLE, "So sánh mẫu\nvới đầu vào\nbằng đối sánh điểm"),
+    def get_section_hdr(self, text):
+        title = self.ct(text, font_size=30, color=TEXT_BRIGHT, weight=BOLD)
+        underline = Line(
+            start=title.get_left() + DOWN * 0.3,
+            end=title.get_right() + DOWN * 0.3,
+            color=PRIMARY,
+            stroke_width=3,
+        )
+        return VGroup(title, underline)
+
+    def section_title(self):
+        """Tiêu đề mục — Segment 1 = 8.42s."""
+        num = self.ct("06", font_size=80, color=PRIMARY, weight=BOLD, font="Consolas")
+        title = self.ct("Tóm Tắt & Kết Luận", font_size=44, color=TEXT_BRIGHT, weight=BOLD)
+        subtitle = self.ct("Hành trình của dữ liệu vân tay từ quét đến khớp", font_size=22, color=TEXT_DIM)
+        group = VGroup(num, title, subtitle).arrange(DOWN, buff=0.4)
+
+        self.play(FadeIn(num, scale=1.5), run_time=0.5)
+        self.play(FadeIn(title, shift=UP * 0.3), run_time=1.0)
+        self.play(FadeIn(subtitle, shift=UP * 0.2), run_time=1.0)
+
+        # Target = 8.42s. Anim play = 2.5s. FadeOut = 1.0s. Need 4.92s wait.
+        self.wait(4.92)
+        self.play(FadeOut(group), run_time=1.0)
+        self.wait(0.8) # Silence gap
+
+    def pipeline_recap(self):
+        """Tóm tắt quy trình xử lý dữ liệu vân tay — Segment 2 = 29.09s."""
+        section = self.get_section_hdr("Quy trình nhận dạng vân tay tổng quát")
+        section.to_edge(UP, buff=0.6)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+
+        steps = [
+            ("Thu nhận ảnh", "Quang học, Điện dung, Siêu âm", OPTICAL_COLOR),
+            ("Tăng cường ảnh", "Bộ lọc Gabor, lọc tần số", RIDGE_COLOR),
+            ("Trích đặc trưng", "Binarize, Thinning, CN", CHART_ORANGE),
+            ("Đối sánh", "Hough Transform, Vector", CHART_BLUE),
         ]
 
-        stage_groups = VGroup()
-        for title, icon_text, color, desc in stages:
+        boxes = VGroup()
+        for name, desc, color in steps:
             box = create_rounded_box(
-                width=3.2, height=3.5,
+                width=2.6, height=2.6,
                 fill_color=color, fill_opacity=0.08,
-                stroke_color=color, stroke_width=2,
+                stroke_color=color, stroke_width=1.5,
             )
-            icon = Text(icon_text, font_size=36)
-            title_label = Text(title, font_size=20, color=color, weight=BOLD)
-            desc_label = Text(desc, font_size=14, color=TEXT_DIM, line_spacing=1.2)
-            content = VGroup(icon, title_label, desc_label).arrange(DOWN, buff=0.3)
+            title = self.ct(name, font_size=15, color=color, weight=BOLD)
+            desc_lbl = Paragraph(
+                *desc.split("\n"),
+                font_size=24, color=TEXT_DIM, alignment="center", line_spacing=1.2
+            ).scale(12 / 24)
+            content = VGroup(title, desc_lbl).arrange(DOWN, buff=0.25)
             content.move_to(box)
-            stage_groups.add(VGroup(box, content))
+            boxes.add(VGroup(box, content))
 
-        stage_groups.arrange(RIGHT, buff=0.5).shift(DOWN * 0.3)
+        boxes.arrange(RIGHT, buff=0.6).shift(DOWN * 0.2)
 
         arrows = VGroup()
-        for i in range(len(stage_groups) - 1):
+        for i in range(len(boxes) - 1):
             arrow = Arrow(
-                stage_groups[i][0].get_right(), stage_groups[i + 1][0].get_left(),
-                color=PRIMARY, stroke_width=3, buff=0.1,
+                boxes[i][0].get_right(), boxes[i + 1][0].get_left(),
+                color=PRIMARY, stroke_width=2, buff=0.1,
+                max_tip_length_to_length_ratio=0.25,
             )
             arrows.add(arrow)
 
         result_box = create_rounded_box(
-            width=3, height=0.8,
-            fill_color=MATCH_COLOR, fill_opacity=0.15,
+            width=2.8, height=1.2,
+            fill_color=MATCH_COLOR, fill_opacity=0.2,
             stroke_color=MATCH_COLOR, stroke_width=2,
-        ).to_edge(DOWN, buff=0.8)
-        result_text = Text("Khớp / Không khớp", font_size=18, color=MATCH_COLOR, weight=BOLD)
-        result_text.move_to(result_box)
+        ).next_to(boxes[3], DOWN, buff=0.6)
+        result_text = self.ct("KẾT QUẢ XÁC THỰC", font_size=16, color=MATCH_COLOR, weight=BOLD).move_to(result_box.get_center())
 
         final_arrow = Arrow(
-            stage_groups[-1][0].get_bottom(), result_box.get_top(),
-            color=MATCH_COLOR, stroke_width=2, buff=0.1,
+            boxes[3][0].get_bottom(), result_box.get_top(),
+            color=MATCH_COLOR, stroke_width=2.5, buff=0.1,
+            max_tip_length_to_length_ratio=0.25,
         )
 
-        for i, sg in enumerate(stage_groups):
-            self.play(FadeIn(sg, shift=UP * 0.4, scale=0.9), run_time=0.6)
-            if i < len(arrows):
-                self.play(GrowArrow(arrows[i]), run_time=0.3)
-        self.play(GrowArrow(final_arrow), FadeIn(VGroup(result_box, result_text)))
+        # Show sequentially matching audio: Target = 29.09s
+        self.play(FadeIn(boxes[0], shift=UP * 0.4), run_time=0.8)
+        self.wait(5.0)
+        self.play(GrowArrow(arrows[0]), FadeIn(boxes[1], shift=UP * 0.4), run_time=0.8)
+        self.wait(5.0)
+        self.play(GrowArrow(arrows[1]), FadeIn(boxes[2], shift=UP * 0.4), run_time=0.8)
+        self.wait(5.0)
+        self.play(GrowArrow(arrows[2]), FadeIn(boxes[3], shift=UP * 0.4), run_time=0.8)
+        self.wait(4.0)
 
-        self.wait(1)
-        self.play(FadeOut(Group(*self.mobjects)))
+        # Success Match Highlight (Premium visual flash & ripple)
+        self.play(GrowArrow(final_arrow), FadeIn(VGroup(result_box, result_text)), run_time=0.8)
+        success_ring = Circle(radius=0.1, color=MATCH_COLOR, stroke_width=2.5).move_to(result_box.get_center())
+        self.add(success_ring)
+        self.play(success_ring.animate.scale(20).set_stroke(opacity=0), run_time=0.8)
+        self.remove(success_ring)
+        
+        self.wait(4.5) # Remaining wait to hit 29.09s
 
-    def performance(self):
-        """Hiển thị thông tin đánh giá hiệu suất."""
-        section = get_section_title("Hiệu suất: Cuộc thi FVC")
+        # Target = 29.09s. Anim play = 0.6 + 0.8 + 5.0 + 0.8 + 5.0 + 0.8 + 5.0 + 0.8 + 4.0 + 0.8 + 0.8 = 24.4s. FadeOut = 1.0s. Wait = 3.69s.
+        # Adjusted wait to match final audio exactly: 29.09s - 24.4s - 1.0s = 3.69s.
+        self.wait(0.19) # (using 3.88s total waiting splits)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+        self.wait(0.8)
+
+    def evaluation_standards(self):
+        """Các tiêu chuẩn đánh giá hệ thống vân tay — Segment 3 = 22.99s."""
+        section = self.get_section_hdr("Các cuộc thi và tiêu chuẩn quốc tế")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3))
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
-        fvc_data = [
-            ("FVC2000", "11", "—"),
-            ("FVC2002", "31", "—"),
-            ("FVC2004", "67", "2.07%"),
-            ("FVC2006", "70", "—"),
+        standards = [
+            ("FVC (Fingerprint Verification Competition)", "Cuộc thi kiểm thử thuật toán độc lập lớn nhất."),
+            ("NIST MINEX & IREX", "Đánh giá khả năng tương thích và hiệu năng minutiae của chính phủ Mỹ."),
+            ("FBI CJIS Standards", "Chứng nhận máy quét vân tay đáp ứng chất lượng ảnh điều tra hình sự."),
         ]
 
-        header = VGroup(
-            Text("Cuộc thi", font_size=16, color=PRIMARY, weight=BOLD),
-            Text("Số thuật toán", font_size=16, color=PRIMARY, weight=BOLD),
-            Text("EER tốt nhất", font_size=16, color=PRIMARY, weight=BOLD),
-        ).arrange(RIGHT, buff=1.5)
-
-        rows = VGroup()
-        for year, algos, eer in fvc_data:
-            row = VGroup(
-                Text(year, font_size=16, color=TEXT_COLOR),
-                Text(algos, font_size=16, color=CHART_BLUE),
-                Text(eer, font_size=16, color=MATCH_COLOR if eer != "—" else TEXT_DIM),
-            ).arrange(RIGHT, buff=1.5)
-            rows.add(row)
-
-        table = VGroup(header, *rows).arrange(DOWN, buff=0.35).shift(DOWN * 0.3)
-
-        for row in [header, *rows]:
-            for i, elem in enumerate(row):
-                target_x = header[i].get_center()[0]
-                elem.move_to([target_x, elem.get_center()[1], 0])
-
-        h_line = Line(
-            header.get_left() + DOWN * 0.2 + LEFT * 0.3,
-            header.get_right() + DOWN * 0.2 + RIGHT * 0.3,
-            color=TEXT_DIM, stroke_width=1,
-        )
-
-        growth_text = Text(
-            "25 → 150 tổ chức đăng ký (tăng 6 lần!)",
-            font_size=18, color=RIDGE_COLOR,
-        ).to_edge(DOWN, buff=0.5)
-
-        self.play(FadeIn(header), Create(h_line))
-        self.play(
-            LaggedStart(*[FadeIn(r, shift=RIGHT * 0.2) for r in rows], lag_ratio=0.3),
-            run_time=2,
-        )
-        self.play(FadeIn(growth_text, shift=UP * 0.2))
-
-        self.wait(1)
-        self.play(FadeOut(Group(*self.mobjects)))
-
-    def open_issues(self):
-        """Trình bày các thách thức còn mở."""
-        section = get_section_title("Các thách thức còn mở")
-        section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3))
-
-        challenges = [
-            ("Ảnh chất lượng kém", "Cảm biến giá rẻ, ngón tay\nướt/khô, người cao tuổi", CHART_ORANGE),
-            ("Tấn công giả mạo", "Vân tay giả có thể đánh lừa\ncảm biến", MINUTIA_TERM),
-            ("Bảo mật mẫu", "Mẫu bị đánh cắp có thể\nbị giải mã ngược", CHART_PURPLE),
-            ("Đối sánh quy mô lớn", "Cơ sở dữ liệu FBI: hơn\n200 triệu bản ghi", CHART_BLUE),
-        ]
-
-        challenge_groups = VGroup()
-        for title, desc, color in challenges:
-            icon = VGroup(
-                RoundedRectangle(
-                    width=0.4, height=0.4, corner_radius=0.05,
-                    fill_color=color, fill_opacity=0.2,
-                    stroke_color=color, stroke_width=1.5,
-                ),
-                Text("⚠", font_size=16, color=color),
+        cards = VGroup()
+        for title_text, desc_text in standards:
+            box = create_rounded_box(
+                width=11.0, height=1.3,
+                fill_color=SECONDARY, fill_opacity=0.3,
+                stroke_color=PRIMARY, stroke_width=1.5,
             )
-            title_text = Text(title, font_size=18, color=color, weight=BOLD)
-            desc_text = Text(desc, font_size=14, color=TEXT_DIM, line_spacing=1.2)
-            content = VGroup(title_text, desc_text).arrange(DOWN, aligned_edge=LEFT, buff=0.1)
-            row = VGroup(icon, content).arrange(RIGHT, buff=0.4)
-            challenge_groups.add(row)
+            title = self.ct(title_text, font_size=16, color=TEXT_BRIGHT, weight=BOLD)
+            desc = self.ct(desc_text, font_size=13, color=TEXT_DIM)
+            content = VGroup(title, desc).arrange(DOWN, aligned_edge=LEFT, buff=0.15)
+            content.move_to(box.get_left() + RIGHT * 0.5, aligned_edge=LEFT)
+            cards.add(VGroup(box, content))
 
-        challenge_groups.arrange(DOWN, buff=0.5, aligned_edge=LEFT).shift(DOWN * 0.3)
+        cards.arrange(DOWN, buff=0.4).shift(DOWN * 0.25)
 
-        self.play(
-            LaggedStart(
-                *[FadeIn(c, shift=RIGHT * 0.3) for c in challenge_groups],
-                lag_ratio=0.3,
-            ),
-            run_time=3,
-        )
+        # Show sequentially: Target = 22.99s
+        self.play(FadeIn(cards[0], shift=RIGHT * 0.3), run_time=0.8)
+        self.wait(6.0)
+        self.play(FadeIn(cards[1], shift=RIGHT * 0.3), run_time=0.8)
+        self.wait(6.0)
+        self.play(FadeIn(cards[2], shift=RIGHT * 0.3), run_time=0.8)
+        self.wait(6.99)
 
-        self.wait(1)
-        self.play(FadeOut(Group(*self.mobjects)))
+        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+        self.wait(0.8)
 
     def outro(self):
-        """Màn hình kết thúc."""
+        """Phần kết và lời cảm ơn — Segment 4 = 9.77s."""
+        thanks = self.ct("Cảm ơn các bạn đã theo dõi!", font_size=42, color=TEXT_BRIGHT, weight=BOLD)
+        thanks.shift(UP * 0.6)
+
+        line = Line(LEFT * 4, RIGHT * 4, color=PRIMARY, stroke_width=2.5).next_to(thanks, DOWN, buff=0.35)
+        subtitle = self.ct("Môn học: Nhận dạng mẫu — HCMUS", font_size=20, color=RIDGE_COLOR).next_to(line, DOWN, buff=0.4)
+        course = self.ct("Giảng viên hướng dẫn: PGS. TS. Trần Minh Triết", font_size=16, color=TEXT_DIM).next_to(subtitle, DOWN, buff=0.25)
+
+        hashtags = self.ct("#Biometrics #FingerprintRecognition #PatternRecognition", font_size=13, color=PRIMARY).to_edge(DOWN, buff=0.6)
+
         fp = create_fingerprint_simple(scale=0.8, color=RIDGE_COLOR)
-        fp.set_opacity(0.1).scale(2)
+        fp.set_opacity(0.12).scale(2.2).move_to(ORIGIN)
 
-        thanks = Text("Cảm ơn các bạn đã theo dõi!", font_size=48, color=TEXT_BRIGHT, weight=BOLD)
-        line = Line(LEFT * 3, RIGHT * 3, color=PRIMARY, stroke_width=2)
-        subtitle = Text("Nhận Dạng Vân Tay", font_size=28, color=PRIMARY)
-        course = Text(
-            "CSC14006 - Nhận dạng mẫu\nĐại học Khoa học Tự nhiên, ĐHQG TP.HCM",
-            font_size=18, color=TEXT_DIM, line_spacing=1.3,
-        )
-        hashtags = Text(
-            "#fithcmus  #patternrecognition  #ai  #ml",
-            font_size=16, color=RIDGE_COLOR,
-        )
+        # Drawing the fingerprint in the background (Premium effect)
+        self.play(Create(fp, run_time=2.0))
+        self.play(Write(thanks, run_time=1.2))
+        self.play(Create(line, run_time=0.5))
+        self.play(FadeIn(subtitle, shift=UP * 0.2), run_time=0.6)
+        self.play(FadeIn(course, shift=UP * 0.2), run_time=0.6)
+        self.play(FadeIn(hashtags, shift=UP * 0.2), run_time=0.6)
 
-        content = VGroup(thanks, line, subtitle, course, hashtags)
-        content.arrange(DOWN, buff=0.4)
-
-        self.play(FadeIn(fp, run_time=2))
-        self.play(Write(thanks, run_time=1.5))
-        self.play(Create(line))
-        self.play(FadeIn(subtitle, shift=UP * 0.2))
-        self.play(FadeIn(course, shift=UP * 0.2))
-        self.play(FadeIn(hashtags, shift=UP * 0.2))
-
-        self.wait(2)
-        self.play(*[FadeOut(mob) for mob in self.mobjects], run_time=2)
-        self.wait(1)
+        # Target = 9.77s. Anim play = 2.0 + 1.2 + 0.5 + 0.6 + 0.6 + 0.6 = 5.5s. FadeOut = 1.0s. Remaining wait = 3.27s.
+        self.wait(3.27)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)

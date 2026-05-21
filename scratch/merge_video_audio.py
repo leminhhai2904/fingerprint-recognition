@@ -40,37 +40,37 @@ def merge_assets(scene_list, filter_id=None):
 scenes_to_merge = [
     {
         "video": "media/videos/scene01_intro/480p15/Scene01Intro.mp4",
-        "audio": "dist/voice_scene01.mp3",
+        "audio": "dist/audio/audio_scene_1.mp3",
         "output": "dist/scene01_final.mp4"
     },
     {
         "video": "media/videos/scene02_sensing/480p15/Scene02Sensing.mp4",
-        "audio": "dist/voice_scene02.mp3",
+        "audio": "dist/audio/audio_scene_2.mp3",
         "output": "dist/scene02_final.mp4"
     },
     {
         "video": "media/videos/scene03_features/480p15/Scene03Features.mp4",
-        "audio": "dist/voice_scene03.mp3",
+        "audio": "dist/audio/audio_scene_3.mp3",
         "output": "dist/scene03_final.mp4"
     },
     {
         "video": "media/videos/scene04_extraction/480p15/Scene04Extraction.mp4",
-        "audio": "dist/voice_scene04.mp3",
+        "audio": "dist/audio/audio_scene_4.mp3",
         "output": "dist/scene04_final.mp4"
     },
     {
         "video": "media/videos/scene05_correlation/480p15/Scene05Correlation.mp4",
-        "audio": "dist/voice_scene05.mp3",
+        "audio": "dist/audio/audio_scene_5.mp3",
         "output": "dist/scene05_final.mp4"
     },
     {
         "video": "media/videos/scene06_minutiae/480p15/Scene06Minutiae.mp4",
-        "audio": "dist/voice_scene06.mp3",
+        "audio": "dist/audio/audio_scene_6.mp3",
         "output": "dist/scene06_final.mp4"
     },
     {
         "video": "media/videos/scene07_conclusion/480p15/Scene07Conclusion.mp4",
-        "audio": "dist/voice_scene07.mp3",
+        "audio": "dist/audio/audio_scene_7.mp3",
         "output": "dist/scene07_final.mp4"
     }
 ]
