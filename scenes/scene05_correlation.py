@@ -3,6 +3,7 @@ Scene 5: Đối sánh dựa trên tương quan (Correlation-based Matching)
 - Thách thức đối sánh vân tay
 - Ba họ phương pháp đối sánh
 - Đối sánh tương quan chéo + Khớp hộp sáng nháy xanh lá
+  + Minh họa tăng tốc bằng biến đổi Fourier (Fourier Domain Acceleration)
 - Vấn đề của tương quan trực tiếp
 """
 from manim import *
@@ -156,17 +157,55 @@ class Scene05Correlation(Scene):
             run_time=2.0, rate_func=smooth,
         )
         
-        # Match Green Flash (Premium visual)
+        # Match Green Flash
         flash_box = i_box.copy().set_color(MATCH_COLOR).set_stroke(width=4)
         self.play(
             FadeIn(score, scale=1.5),
             Create(flash_box),
             run_time=0.6
         )
-        self.play(FadeOut(flash_box), run_time=0.4)
+        self.play(FadeOut(flash_box), run_time=0.4) # Total 5.8s
 
-        # Target = 17.40s. Anim play = 0.6 + 0.8 + 0.8 + 0.6 + 2.0 + 0.6 + 0.4 = 5.8s. FadeOut = 1.0s. Need 10.60s wait.
-        self.wait(10.60)
+        # --- FOURIER DOMAIN ACCELERATION TRANSITION ---
+        self.play(
+            t_group.animate.scale(0.6).to_edge(UP, buff=1.3).shift(LEFT * 1.5),
+            i_group.animate.scale(0.6).to_edge(UP, buff=1.3).shift(RIGHT * 1.5),
+            FadeOut(formula),
+            FadeOut(search_text),
+            FadeOut(score),
+            run_time=1.0
+        ) # Total 6.8s
+
+        fourier_box = create_rounded_box(width=10.0, height=3.2, fill_color=CHART_PURPLE, fill_opacity=0.1, stroke_color=CHART_PURPLE, stroke_width=1.5).shift(DOWN * 1.3)
+        fourier_title = self.ct("Tăng Tốc Trong Miền Tần Số Fourier", font_size=16, color=CHART_PURPLE, weight=BOLD).next_to(fourier_box.get_top(), DOWN, buff=0.25)
+        
+        spatial_col = VGroup(
+            self.ct("Miền không gian (Spatial)", font_size=12, color=TEXT_DIM, weight=BOLD),
+            self.ct("Phép chập (Convolution)", font_size=11, color=TEXT_COLOR),
+            MathTex(r"\mathcal{O}(N^4)", font_size=20, color=DELTA_COLOR)
+        ).arrange(DOWN, buff=0.15).move_to(fourier_box.get_center() + LEFT * 2.6 + DOWN * 0.2)
+        
+        freq_col = VGroup(
+            self.ct("Miền tần số (Fourier)", font_size=12, color=PRIMARY, weight=BOLD),
+            self.ct("Phép nhân trực tiếp (Multiplication)", font_size=11, color=TEXT_COLOR),
+            MathTex(r"\mathcal{O}(N^2 \log N)", font_size=20, color=MATCH_COLOR)
+        ).arrange(DOWN, buff=0.15).move_to(fourier_box.get_center() + RIGHT * 2.6 + DOWN * 0.2)
+        
+        fft_formula = MathTex(
+            r"\mathcal{F}(T \star I) = \mathcal{F}(T) \cdot \mathcal{F}(I)^*",
+            font_size=24, color=TEXT_BRIGHT
+        ).move_to(fourier_box.get_center() + DOWN * 0.2)
+
+        self.play(FadeIn(fourier_box), FadeIn(fourier_title), run_time=0.6) # Total 7.4s
+        self.play(FadeIn(spatial_col, shift=RIGHT * 0.2), run_time=0.8) # Total 8.2s
+        self.play(FadeIn(freq_col, shift=LEFT * 0.2), run_time=0.8) # Total 9.0s
+        self.play(Write(fft_formula), run_time=1.0) # Total 10.0s
+        
+        spark = Flash(freq_col[2].get_center(), color=MATCH_COLOR, line_length=0.25, flash_radius=0.3)
+        self.play(spark, run_time=0.5) # Total 10.5s
+
+        # Target = 17.40s. Wait remaining = 17.40s - 10.5s - 1.0s (FadeOut) = 5.90s.
+        self.wait(5.90)
         self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
         self.wait(0.8)
 
@@ -207,4 +246,4 @@ class Scene05Correlation(Scene):
 
         # Target = 14.42s. Anim play = 0.6 + 2.0 + 0.8 = 3.4s. FadeOut = 1.0s. Need 10.02s wait.
         self.wait(10.02)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+

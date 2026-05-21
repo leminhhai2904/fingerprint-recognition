@@ -1,9 +1,10 @@
 """
-Scene 4: Trích xuất đặc trưng (Feature Extraction) (Section 2.3)
-- Hướng đường vân (Orientation) & Tần số đường vân (Frequency)
-- Phân vùng ảnh (Segmentation) & Vùng kỳ dị (Poincaré Index)
-- Quy trình xử lý ảnh: xám -> tăng cường -> nhị phân -> xương + Quét laser đồng bộ
-- Thuật toán Crossing Number (CN)
+Scene 4: Quy trình Trích xuất Đặc trưng (Feature Extraction)
+- Ước lượng trường hướng (Orientation Field) với đường quét laser và góc xoay
+- Trường tần số (Ridge Frequency) với đồ thị sóng sin biểu diễn khoảng cách d
+- Phân vùng ảnh và Chỉ số Poincaré (Poincaré Index) tích phân đường khép kín có bộ đếm góc tăng dần
+- Quy trình xử lý ảnh: Grayscale -> Gabor Enhanced -> Binarized -> Skeleton với đường quét laser trượt ngang
+- Thuật toán Crossing Number (CN) chi tiết với lưới pixel 3x3 và hoạt ảnh quét vòng tròn tìm Termination/Bifurcation
 """
 from manim import *
 import numpy as np
@@ -25,7 +26,7 @@ class Scene04Extraction(Scene):
         self.crossing_number_extraction()
 
     def ct(self, text_str, font_size=18, color=TEXT_COLOR, weight=NORMAL, **kwargs):
-        """create_text with CMU Serif kerning workaround (render big → scale down)."""
+        """create_text với CMU Serif kerning workaround (render to lớn rồi scale xuống)."""
         return Text(text_str, font_size=36, color=color, weight=weight, **kwargs).scale(font_size / 36)
 
     def get_section_hdr(self, text):
@@ -56,260 +57,373 @@ class Scene04Extraction(Scene):
 
     def orientation_and_frequency(self):
         """Trường hướng & Trường tần số — Segment 2 = 13.25s."""
-        section = self.get_section_hdr("Trường hướng & Trường tần số")
+        section = self.get_section_hdr("Trường Hướng & Trường Tần Số")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
 
-        # Trực quan hóa trường hướng (Trái)
-        orient_label = self.ct("Trường hướng (Orientation Field)", font_size=18, color=CHART_BLUE, weight=BOLD)
+        # 1. Trường hướng (Trái)
+        orient_label = self.ct("Trường Hướng (Orientation Field)", font_size=16, color=CHART_BLUE, weight=BOLD)
         field = create_orientation_field(rows=7, cols=9, width=4.5, height=3.2)
-        field_box = create_rounded_box(width=5.0, height=3.6, fill_color=CHART_BLUE, fill_opacity=0.05, stroke_color=CHART_BLUE, stroke_width=1.5)
-        field.move_to(field_box)
-        orient_label.next_to(field_box, UP, buff=0.25)
-        orient_group = VGroup(field_box, field, orient_label).shift(LEFT * 3 + DOWN * 0.2)
+        field_box = create_rounded_box(width=5.0, height=3.6, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_BLUE, stroke_width=1.5)
+        field.move_to(field_box.get_center())
+        orient_label.next_to(field_box, UP, buff=0.2)
+        orient_group = VGroup(field_box, field, orient_label).shift(LEFT * 3.3 + DOWN * 0.2)
 
         formula_part = MathTex(r"\theta(x, y)", font_size=26, color=PRIMARY)
-        text_part = self.ct("= hướng cục bộ của đường vân", font_size=14, color=TEXT_DIM)
-        orient_formula = VGroup(formula_part, text_part).arrange(RIGHT, buff=0.1).next_to(field_box, DOWN, buff=0.4)
-        orient_desc = self.ct("Tính bằng gradient cường độ pixel", font_size=13, color=TEXT_DIM).next_to(orient_formula, DOWN, buff=0.15)
+        text_part = self.ct("= hướng cục bộ đường vân", font_size=13, color=TEXT_DIM)
+        orient_formula = VGroup(formula_part, text_part).arrange(RIGHT, buff=0.1).next_to(field_box, DOWN, buff=0.3)
 
-        # Trực quan hóa trường tần số (Phải)
-        freq_label = self.ct("Trường tần số (Ridge Frequency)", font_size=18, color=CHART_ORANGE, weight=BOLD)
+        # Quét laser đo góc cục bộ
+        scan_bar = Line(field_box.get_left() + UP * 1.6, field_box.get_right() + UP * 1.6, color=PRIMARY, stroke_width=3.5)
+
+        # 2. Trường tần số (Phải)
+        freq_label = self.ct("Trường Tần Số (Ridge Frequency)", font_size=16, color=CHART_ORANGE, weight=BOLD)
+        freq_box = create_rounded_box(width=5.0, height=3.6, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_ORANGE, stroke_width=1.5)
+        freq_label.next_to(freq_box, UP, buff=0.2)
+
+        # Vẽ đường vân song song
         freq_ridges = VGroup()
-        for i in range(12):
-            x = (i - 5.5) * 0.28
-            freq_ridges.add(Line(UP * 1.2 + RIGHT * x, DOWN * 1.2 + RIGHT * x, color=RIDGE_COLOR, stroke_width=3))
-        freq_box = create_rounded_box(width=5.0, height=3.6, fill_color=CHART_ORANGE, fill_opacity=0.05, stroke_color=CHART_ORANGE, stroke_width=1.5)
-        freq_ridges.move_to(freq_box)
-        freq_label.next_to(freq_box, UP, buff=0.25)
-        freq_group = VGroup(freq_box, freq_ridges, freq_label).shift(RIGHT * 3 + DOWN * 0.2)
+        for idx in range(10):
+            x = (idx - 4.5) * 0.35
+            line = Line(UP * 1.1 + RIGHT * x, DOWN * 1.1 + RIGHT * x, color=RIDGE_COLOR, stroke_width=3.5)
+            freq_ridges.add(line)
+        freq_ridges.move_to(freq_box.get_center())
 
-        brace = Brace(freq_ridges[4:7], DOWN, color=CHART_ORANGE, buff=0.1)
-        spacing_label = self.ct("Khoảng cách d", font_size=13, color=CHART_ORANGE).next_to(brace, DOWN, buff=0.1)
+        # Đồ thị sóng hình sin bên dưới mô phỏng cường độ pixel sáng/tối
+        axes = Axes(x_range=[0, 4, 1], y_range=[-1.2, 1.2, 1], x_length=4.2, y_length=1.4, tips=False, axis_config={"include_ticks": False, "stroke_width": 1.0}).move_to(freq_box.get_center() + DOWN * 0.2)
+        sin_curve = axes.plot(lambda x: np.sin(2 * np.pi * x * 1.1), x_range=[0, 3.8], color=CHART_ORANGE, stroke_width=2.5)
+        
+        brace = Brace(freq_ridges[3:5], DOWN, color=CHART_ORANGE, buff=0.1)
+        spacing_label = self.ct("Khoảng cách d", font_size=11, color=CHART_ORANGE).next_to(brace, DOWN, buff=0.05)
 
         formula_part_f = MathTex(r"f(x, y) = 1 / d", font_size=26, color=PRIMARY)
-        text_part_f = self.ct("= tần số đường vân cục bộ", font_size=14, color=TEXT_DIM)
-        freq_formula = VGroup(formula_part_f, text_part_f).arrange(RIGHT, buff=0.1).next_to(freq_box, DOWN, buff=0.4)
+        text_part_f = self.ct("= tần số đường vân", font_size=13, color=TEXT_DIM)
+        freq_formula = VGroup(formula_part_f, text_part_f).arrange(RIGHT, buff=0.1).next_to(freq_box, DOWN, buff=0.3)
 
-        self.play(FadeIn(orient_label), run_time=0.5)
-        self.play(
-            LaggedStart(*[FadeIn(seg, scale=0) for seg in field], lag_ratio=0.01),
-            run_time=1.5,
-        )
-        self.play(FadeIn(orient_formula), FadeIn(orient_desc), run_time=0.8)
+        freq_group = VGroup(freq_box, freq_ridges, freq_label, axes, sin_curve, brace, spacing_label)
+        freq_group.shift(RIGHT * 3.3 + DOWN * 0.2)
+
+        # Hoạt ảnh xuất hiện
+        self.play(FadeIn(field_box), FadeIn(orient_label), run_time=0.8) # Total 1.4s
+        self.play(FadeIn(scan_bar), run_time=0.4) # Total 1.8s
         
-        self.play(FadeIn(freq_label), run_time=0.5)
+        # Di chuyển laser quét qua trường hướng và xoay dần các kim hướng
         self.play(
-            LaggedStart(*[Create(r) for r in freq_ridges], lag_ratio=0.15),
-            run_time=1.0,
-        )
-        self.play(GrowFromCenter(brace), FadeIn(spacing_label), run_time=0.8)
-        self.play(FadeIn(freq_formula), run_time=0.8)
+            scan_bar.animate.move_to(field_box.get_bottom() + UP * 0.2),
+            LaggedStart(*[FadeIn(seg, scale=0.5) for seg in field], lag_ratio=0.015),
+            run_time=2.0
+        ) # Total 3.8s
+        self.play(FadeOut(scan_bar), FadeIn(orient_formula), run_time=0.6) # Total 4.4s
 
-        # Target = 13.25s. Anim play = 0.6 + 0.5 + 1.5 + 0.8 + 0.5 + 1.0 + 0.8 + 0.8 = 6.5s. FadeOut = 1.0s. Need 5.75s wait.
-        self.wait(5.75)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+        # Xuất hiện trường tần số
+        self.play(FadeIn(freq_box), FadeIn(freq_label), run_time=0.8) # Total 5.2s
+        self.play(Create(freq_ridges), run_time=1.0) # Total 6.2s
+        
+        # Vẽ sóng sin tần số bên dưới cùng dấu ngoặc đo khoảng cách d
+        self.play(Create(sin_curve), FadeIn(axes), run_time=1.2) # Total 7.4s
+        self.play(GrowFromCenter(brace), FadeIn(spacing_label), run_time=0.6) # Total 8.0s
+        self.play(FadeIn(freq_formula), run_time=0.6) # Total 8.6s
+
+        # Target = 13.25s. Play = 8.6s. Wait = 13.25 - 8.6 - 1.0 = 3.65s
+        self.wait(3.65)
+        self.play(FadeOut(VGroup(section, field_box, orient_label, field, orient_formula, freq_box, freq_label, freq_ridges, axes, sin_curve, brace, spacing_label, freq_formula)), run_time=1.0)
         self.wait(0.8)
 
     def segmentation_and_singularities(self):
         """Phân vùng & Phát hiện vùng kỳ dị — Segment 3 = 17.59s."""
-        section = self.get_section_hdr("Phân vùng & Vùng Kỳ dị")
+        section = self.get_section_hdr("Phân Vùng & Điểm Kỳ Dị")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
 
-        # Left box: Segmentation
-        seg_box = create_rounded_box(
-            width=5.0, height=3.5,
-            fill_color=SECONDARY, fill_opacity=0.2,
-            stroke_color=CHART_ORANGE, stroke_width=1.5,
-        )
-        seg_title = self.ct("Phân vùng (Segmentation)", font_size=18, color=CHART_ORANGE, weight=BOLD)
+        # Trái: Segmentation Card
+        seg_box = create_rounded_box(width=5.0, height=3.5, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_ORANGE, stroke_width=1.5)
+        seg_title = self.ct("Phân vùng (Segmentation)", font_size=16, color=CHART_ORANGE, weight=BOLD)
         
-        # Simple fingerprint outline inside seg_box
-        outline = Circle(radius=0.9, color=TEXT_DIM, stroke_width=1.5).set_opacity(0.4)
-        active_area = Circle(radius=0.9, color=CHART_ORANGE, fill_color=CHART_ORANGE, fill_opacity=0.15, stroke_width=2.5)
-        bg_label = self.ct("Nền nhiễu (Background)", font_size=12, color=TEXT_DIM).move_to(DOWN*0.9)
-        fg_label = self.ct("Vân tay (Foreground)", font_size=12, color=CHART_ORANGE).move_to(ORIGIN)
-        seg_vis = VGroup(outline, active_area, bg_label, fg_label).scale(0.8).move_to(DOWN*0.2)
+        # Mô phỏng phân tách vân tay (Foreground) và nhiễu viền (Background)
+        fg_area = Circle(radius=0.8, color=CHART_ORANGE, fill_color=CHART_ORANGE, fill_opacity=0.15, stroke_width=2.5)
+        bg_area = DashedVMobject(Circle(radius=1.2, color=TEXT_DIM, stroke_width=1.5)).set_opacity(0.35)
+        
+        # Vân tay mô phỏng bên trong vùng fg
+        finger_lines = VGroup()
+        for idx in range(4):
+            arc = Arc(radius=0.15 + idx * 0.18, start_angle=-PI/3, angle=2*PI/3, color=CHART_ORANGE, stroke_width=2.0).move_to(fg_area.get_center())
+            finger_lines.add(arc)
 
-        seg_content = VGroup(seg_title, seg_vis).arrange(DOWN, buff=0.3)
-        seg_content.move_to(seg_box)
-        seg_group = VGroup(seg_box, seg_content)
+        # Các dấu chấm nhiễu nền xung quanh
+        noise_dots = VGroup(*[
+            Dot(fg_area.get_center() + np.array([np.cos(a) * r, np.sin(a) * r, 0]), color=DELTA_COLOR, radius=0.04).set_opacity(0.4)
+            for a, r in zip(np.linspace(0, 2*PI, 10), [1.0, 1.1, 1.0, 1.2, 1.1, 1.3, 1.0, 1.1, 1.2, 1.05])
+        ])
 
-        # Right box: Poincaré Index
-        poincare_box = create_rounded_box(
-            width=5.0, height=3.5,
-            fill_color=SECONDARY, fill_opacity=0.3,
-            stroke_color=CHART_BLUE, stroke_width=1.5,
-        )
-        poincare_title = self.ct("Chỉ số Poincaré", font_size=18, color=CHART_BLUE, weight=BOLD)
+        fg_lbl = self.ct("Foreground (Vân Tay)", font_size=10, color=CHART_ORANGE).next_to(fg_area, DOWN, buff=0.1)
+        bg_lbl = self.ct("Background (Nền Nhiễu)", font_size=10, color=TEXT_DIM).next_to(bg_area, UP, buff=0.1)
+
+        seg_vis = VGroup(bg_area, fg_area, finger_lines, noise_dots, fg_lbl, bg_lbl).scale(0.85).shift(DOWN * 0.25)
+        seg_content = VGroup(seg_title, seg_vis)
+        seg_content.move_to(seg_box.get_center())
+        seg_group = VGroup(seg_box, seg_content).shift(LEFT * 3.3 + DOWN * 0.25)
+
+        # Phải: Poincaré Index Card
+        poincare_box = create_rounded_box(width=5.0, height=3.5, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_BLUE, stroke_width=1.5)
+        poincare_title = self.ct("Phương Pháp Chỉ Số Poincaré", font_size=16, color=CHART_BLUE, weight=BOLD)
         
         formula = MathTex(
             r"P(C) = \frac{1}{2\pi} \oint_C d\theta",
-            font_size=26, color=TEXT_BRIGHT,
-        )
+            font_size=28, color=TEXT_BRIGHT
+        ).shift(UP * 0.2)
         
         results = VGroup(
-            self.ct("Loop / Core: P(C) = 180° (π)", font_size=13, color=CHART_BLUE),
-            self.ct("Delta: P(C) = -180° (-π)", font_size=13, color=DELTA_COLOR),
-            self.ct("Whorl: P(C) = 360° (2π)", font_size=13, color=CHART_PURPLE),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
+            self.ct("Loop (Core): P(C) = +180° (+π)", font_size=12, color=CHART_BLUE, weight=BOLD),
+            self.ct("Delta: P(C) = -180° (-π)", font_size=12, color=DELTA_COLOR, weight=BOLD),
+            self.ct("Whorl: P(C) = +360° (+2π)", font_size=12, color=CHART_PURPLE, weight=BOLD)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.16)
         
-        poincare_content = VGroup(poincare_title, formula, results).arrange(DOWN, buff=0.35)
-        poincare_content.move_to(poincare_box)
-        poincare_group = VGroup(poincare_box, poincare_content)
+        poincare_content = VGroup(poincare_title, formula, results).arrange(DOWN, buff=0.3)
+        poincare_content.move_to(poincare_box.get_center())
+        poincare_group = VGroup(poincare_box, poincare_content).shift(RIGHT * 3.3 + DOWN * 0.25)
 
-        both = VGroup(seg_group, poincare_group).arrange(RIGHT, buff=0.8).shift(DOWN * 0.3)
+        # Trực quan hóa Segmentation trước
+        self.play(FadeIn(seg_box), FadeIn(seg_title), run_time=0.8) # Total 1.4s
+        self.play(FadeIn(bg_area), FadeIn(bg_lbl), FadeIn(noise_dots), run_time=0.8) # Total 2.2s
+        
+        # Phân tách vùng active: làm mờ nền nhiễu và làm sáng vùng Foreground
+        self.play(
+            FadeIn(fg_area), FadeIn(finger_lines), FadeIn(fg_lbl),
+            noise_dots.animate.set_opacity(0.1),
+            run_time=1.2
+        ) # Total 3.4s
+        self.wait(1.5) # Total 4.9s
 
-        self.play(FadeIn(seg_group, shift=RIGHT * 0.3), run_time=0.8)
-        self.wait(3.0)
-        self.play(FadeIn(poincare_group, shift=LEFT * 0.3), run_time=0.8)
+        # Xuất hiện Poincaré Card
+        self.play(FadeIn(poincare_box), FadeIn(poincare_title), run_time=0.8) # Total 5.7s
+        self.play(Write(formula), run_time=1.0) # Total 6.7s
+        self.play(FadeIn(results, shift=UP * 0.15), run_time=1.2) # Total 7.9s
 
-        # Target = 17.59s. Anim play so far = 0.6 + 0.8 + 3.0 + 0.8 = 5.2s. FadeOut = 1.0s. Need 11.39s wait.
-        self.wait(11.39)
+        # --- CHẠY HOẠT ẢNH TÍCH PHÂN ĐƯỜNG POINCARÉ ---
+        # Tạm thời dọn dẹp các công thức ở thẻ phải để biểu diễn tích phân
+        self.play(FadeOut(formula), FadeOut(results), run_time=0.8) # Total 8.7s
+
+        pc_center = poincare_box.get_center() + DOWN * 0.3
+        cand_dot = Dot(pc_center, color=CORE_POINT, radius=0.09)
+        cand_lbl = self.ct("Điểm kiểm tra P", font_size=11, color=CORE_POINT).next_to(cand_dot, UP, buff=0.08)
+        
+        # Đường cong tích phân C
+        circle_c = Circle(radius=0.75, color=CHART_BLUE, stroke_width=2.0).move_to(pc_center)
+        circle_lbl = MathTex(r"C", font_size=18, color=CHART_BLUE).next_to(circle_c, UR, buff=0.02)
+        
+        # Các vạch hướng cục bộ xung quanh đường cong khép kín C
+        orient_segs = VGroup()
+        for idx in range(8):
+            ang_pos = idx * (2 * PI / 8)
+            pos = pc_center + np.array([0.75 * np.cos(ang_pos), 0.75 * np.sin(ang_pos), 0])
+            ang_orient = ang_pos / 2.0  # Hướng quay một nửa góc vị trí (mô phỏng Loop)
+            seg = Line(
+                pos + 0.16 * np.array([np.cos(ang_orient), np.sin(ang_orient), 0]),
+                pos - 0.16 * np.array([np.cos(ang_orient), np.sin(ang_orient), 0]),
+                color=TEXT_DIM,
+                stroke_width=2.5
+            )
+            orient_segs.add(seg)
+            
+        pointer = Dot(pc_center + np.array([0.75, 0, 0]), color=PRIMARY, radius=0.08)
+        accum_vec = Arrow(pc_center, pc_center + RIGHT * 0.5, color=PRIMARY, buff=0, stroke_width=3)
+
+        self.play(
+            FadeIn(cand_dot), FadeIn(cand_lbl),
+            FadeIn(circle_c), FadeIn(circle_lbl),
+            FadeIn(orient_segs), FadeIn(accum_vec),
+            run_time=1.0
+        ) # Total 9.7s
+
+        # Chạy tích phân: Con trỏ di chuyển trên đường cong, vector hướng tích lũy góc xoay
+        # Góc xoay tích lũy chạy từ 0 đến +180 độ
+        counter_val = ValueTracker(0)
+        counter_lbl = self.ct("Tích lũy: 0°", font_size=11, color=PRIMARY, weight=BOLD).next_to(circle_c, DOWN, buff=0.1)
+
+        def update_cnt(mobject):
+            mobject.become(
+                self.ct(f"Tích lũy: {int(counter_val.get_value())}°", font_size=11, color=PRIMARY, weight=BOLD).next_to(circle_c, DOWN, buff=0.1)
+            )
+        counter_lbl.add_updater(update_cnt)
+        self.add(counter_lbl)
+
+        self.play(
+            MoveAlongPath(pointer, circle_c),
+            Rotate(accum_vec, angle=PI, about_point=pc_center),
+            counter_val.animate.set_value(180),
+            run_time=3.0,
+            rate_func=linear
+        ) # Total 12.7s
+        
+        counter_lbl.remove_updater(update_cnt)
+        res_lbl = self.ct("P(C) = +180° (Loop Core Detected)", font_size=12, color=MATCH_COLOR, weight=BOLD).next_to(circle_c, DOWN, buff=0.1)
+        
+        self.play(
+            FadeOut(counter_lbl),
+            FadeIn(res_lbl, shift=UP * 0.1),
+            Indicate(cand_dot, color=MATCH_COLOR, scale_factor=2.0),
+            run_time=1.0
+        ) # Total 13.7s
+
+        # Target = 17.59s. Play = 13.7s. Need 17.59s - 13.7s - 1.0s (FadeOut) = 2.89s
+        self.wait(2.89)
         self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
         self.wait(0.8)
 
     def enhancement_pipeline(self):
-        """Hiển thị pipeline: tăng cường → nhị phân → thinning — Segment 4 = 17.21s."""
-        section = self.get_section_hdr("Quy trình xử lý ảnh")
+        """Pipeline xử lý: xám -> tăng cường -> nhị phân -> làm mỏng — Segment 4 = 17.21s."""
+        section = self.get_section_hdr("Quy Trình Tiền Xử Lý Ảnh Vân Tay")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
 
         stages = [
-            ("Ảnh xám", TEXT_DIM, self._create_grayscale_sim()),
-            ("Ảnh tăng cường", RIDGE_COLOR, self._create_enhanced_sim()),
-            ("Ảnh nhị phân", CHART_BLUE, self._create_binary_sim()),
-            ("Ảnh xương", CORE_POINT, self._create_thinned_sim()),
+            ("1. Ảnh Xám", TEXT_DIM, self._create_grayscale_sim()),
+            ("2. Tăng Cường (Gabor)", RIDGE_COLOR, self._create_enhanced_sim()),
+            ("3. Nhị Phân", CHART_BLUE, self._create_binary_sim()),
+            ("4. Làm Mỏng (Xương)", CORE_POINT, self._create_thinned_sim()),
         ]
 
         stage_groups = VGroup()
         for title_text, color, content in stages:
-            box = create_rounded_box(
-                width=2.6, height=2.6,
-                fill_color=color, fill_opacity=0.05,
-                stroke_color=color, stroke_width=1.5,
-            )
-            label = self.ct(title_text, font_size=14, color=color, weight=BOLD)
-            label.next_to(box, DOWN, buff=0.2)
-            content.move_to(box).scale(0.8)
+            box = create_rounded_box(width=2.5, height=2.5, fill_color=SECONDARY, fill_opacity=0.15, stroke_color=color, stroke_width=1.5)
+            label = self.ct(title_text, font_size=13, color=color, weight=BOLD).next_to(box, DOWN, buff=0.25)
+            content.move_to(box.get_center()).scale(0.8)
             stage_groups.add(VGroup(box, content, label))
 
-        stage_groups.arrange(RIGHT, buff=0.7).shift(DOWN * 0.3)
+        stage_groups.arrange(RIGHT, buff=0.6).shift(DOWN * 0.3)
 
+        # Mũi tên liên kết các bước
         arrows = VGroup()
-        for i in range(len(stage_groups) - 1):
+        for idx in range(len(stage_groups) - 1):
             arrow = Arrow(
-                stage_groups[i][0].get_right(), stage_groups[i + 1][0].get_left(),
-                color=PRIMARY, buff=0.1, stroke_width=2,
-                max_tip_length_to_length_ratio=0.25,
+                stage_groups[idx][0].get_right(), stage_groups[idx+1][0].get_left(),
+                color=PRIMARY, buff=0.08, stroke_width=2.5,
+                max_tip_length_to_length_ratio=0.22
             )
             arrows.add(arrow)
 
         filter_desc = self.ct(
-            "Tăng cường: Bộ lọc Gabor ngữ cảnh tự thích ứng theo θ và f",
-            font_size=16, color=TEXT_COLOR,
+            "Bộ lọc ngữ cảnh Gabor hoạt động như một bộ lọc thông dải cục bộ giúp làm rõ đường vân",
+            font_size=15, color=PRIMARY, weight=BOLD
         ).to_edge(DOWN, buff=0.5)
 
-        # Scanning Line Reveal Effect (Premium visual transition)
-        scan_bar = Line(UP * 2.2, DOWN * 2.2, color=PRIMARY, stroke_width=3).set_opacity(0.8)
-        scan_bar.move_to(LEFT * 6.0)
-        self.play(FadeIn(scan_bar, run_time=0.4))
+        # Đường laser quét reveal
+        scan_group = Line(UP * 2.2, DOWN * 2.2, color=PRIMARY, stroke_width=4.0).move_to(LEFT * 6.8)
 
-        for i, sg in enumerate(stage_groups):
-            card_center = sg.get_center()
+        self.play(FadeIn(scan_group), run_time=0.5) # Total 1.1s
+
+        # Quét laser lần lượt để kích hoạt/hiển thị từng Card xử lý ảnh
+        for idx, sg in enumerate(stage_groups):
+            card_x = sg.get_center()[0]
             self.play(
-                scan_bar.animate.move_to([card_center[0], 0, 0]),
-                FadeIn(sg, shift=UP * 0.3),
+                scan_group.animate.move_to([card_x, 0, 0]),
+                FadeIn(sg, shift=UP * 0.25),
                 run_time=0.8
             )
-            if i < len(arrows):
-                self.play(GrowArrow(arrows[i]), run_time=0.3)
+            if idx < len(arrows):
+                self.play(GrowArrow(arrows[idx]), run_time=0.3)
 
-        self.play(FadeOut(scan_bar, run_time=0.4))
-        self.play(FadeIn(filter_desc, shift=UP * 0.2), run_time=0.8)
+        self.play(scan_group.animate.move_to(RIGHT * 6.8), run_time=0.6) # Total 5.8s
+        self.play(FadeOut(scan_group), run_time=0.4) # Total 6.2s
+        self.play(FadeIn(filter_desc, shift=UP * 0.15), run_time=0.8) # Total 7.0s
 
-        # Target = 17.21s. Anim play = 0.6 + 0.4 + 4*0.8 + 3*0.3 + 0.4 + 0.8 = 6.3s. FadeOut = 1.0s. Need 9.91s wait.
-        self.wait(9.91)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+        # Target = 17.21s. Anim play = 7.0s. Need 17.21s - 7.0s - 1.0s (FadeOut) = 9.21s
+        self.wait(9.21)
+        self.play(FadeOut(VGroup(section, stage_groups, arrows, filter_desc)), run_time=1.0)
         self.wait(0.8)
 
     def crossing_number_extraction(self):
         """Thuật toán Crossing Number (CN) — Segment 5 = 13.66s."""
-        section = self.get_section_hdr("Thuật toán Crossing Number (CN)")
+        section = self.get_section_hdr("Trích Xuất Minutiae: Crossing Number")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
 
+        # Công thức Crossing Number
         formula = MathTex(
             r"\text{CN}(P) = \frac{1}{2} \sum_{i=1}^{8} |P_i - P_{i+1}|",
-            font_size=32, color=TEXT_BRIGHT,
-        ).shift(LEFT * 3 + UP * 0.8)
+            font_size=30, color=TEXT_BRIGHT
+        ).shift(LEFT * 3.3 + UP * 0.8)
 
-        grid = create_crossing_number_grid(scale=1.5)
-        grid.shift(RIGHT * 3 + UP * 0.2)
-        grid_lbl = self.ct("Cửa sổ quét 3x3 pixel", font_size=15, color=TEXT_DIM).next_to(grid, DOWN, buff=0.3)
+        # Lưới pixel 3x3
+        grid = create_crossing_number_grid(scale=1.4)
+        grid.shift(RIGHT * 3.3 + UP * 0.15)
+        grid_lbl = self.ct("Cửa sổ quét 3x3 pixel", font_size=13, color=TEXT_DIM).next_to(grid, DOWN, buff=0.2)
 
-        # Giả lập điểm trung tâm P và 8 pixel lân cận
         p_center = Dot(grid[4].get_center(), color=PRIMARY, radius=0.1)
-        p_label = MathTex(r"P", font_size=20, color=PRIMARY).next_to(p_center, UR, buff=0.05)
+        p_label = MathTex(r"P", font_size=18, color=PRIMARY).next_to(p_center, UR, buff=0.03)
 
-        # Minh họa P_i chạy xung quanh cửa sổ
+        # Định vị các điểm lân cận P1 đến P8 (theo chiều kim đồng hồ)
+        # Các chỉ số ô vuông trong grid 3x3:
+        # [0, 1, 2]
+        # [3, 4, 5]
+        # [6, 7, 8]
+        # Thứ tự quét vòng quanh P: P1 (ô 1), P2 (ô 2), P3 (ô 5), P4 (ô 8), P5 (ô 7), P6 (ô 6), P7 (ô 3), P8 (ô 0)
+        neighbor_indices = [1, 2, 5, 8, 7, 6, 3, 0]
         neighbors = VGroup()
-        for idx in [1, 2, 5, 8, 7, 6, 3, 0]: # vòng tròn xung quanh
-            dot = Dot(grid[idx].get_center(), color=CHART_BLUE, radius=0.08)
+        for n_idx in neighbor_indices:
+            dot = Dot(grid[n_idx].get_center(), color=CHART_BLUE, radius=0.08)
             neighbors.add(dot)
 
         cases = VGroup(
-            self.ct("CN(P) = 1  →  Kết thúc (Termination)", font_size=15, color=MINUTIA_TERM),
-            self.ct("CN(P) = 3  →  Phân nhánh (Bifurcation)", font_size=15, color=MINUTIA_BIFUR),
-            self.ct("Khác 1 hoặc 3  →  Đường vân bình thường", font_size=14, color=TEXT_DIM),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.25).shift(LEFT * 3.2 + DOWN * 1.2)
+            self.ct("CN(P) = 1  →  Điểm kết thúc (Termination)", font_size=14, color=MINUTIA_TERM, weight=BOLD),
+            self.ct("CN(P) = 3  →  Điểm phân nhánh (Bifurcation)", font_size=14, color=MINUTIA_BIFUR, weight=BOLD),
+            self.ct("CN(P) = 2  →  Đường vân liên tục bình thường", font_size=13, color=TEXT_DIM)
+        ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).shift(LEFT * 3.3 + DOWN * 1.1)
 
-        self.play(Write(formula), run_time=0.8)
-        self.play(Create(grid), FadeIn(grid_lbl), run_time=1.0)
-        self.play(FadeIn(p_center), FadeIn(p_label), run_time=0.5)
+        self.play(Write(formula), run_time=0.8) # Total 1.4s
+        self.play(Create(grid), FadeIn(grid_lbl), run_time=1.0) # Total 2.4s
+        self.play(FadeIn(p_center), FadeIn(p_label), run_time=0.5) # Total 2.9s
+
+        # Quét vòng quanh P để minh họa thuật toán CN
+        sweep_circle = Circle(radius=0.55, color=PRIMARY, stroke_width=2).move_to(p_center)
+        self.play(FadeIn(sweep_circle), run_time=0.4) # Total 3.3s
         
-        # Cho chạy quét vòng tròn minh họa (Premium effect)
         self.play(
-            LaggedStart(*[FadeIn(n, scale=1.5) for n in neighbors], lag_ratio=0.1),
-            run_time=1.2,
-        )
-        self.play(FadeIn(cases), run_time=0.8)
+            Rotate(sweep_circle, angle=2*PI, about_point=p_center.get_center()),
+            LaggedStart(*[FadeIn(n, scale=1.4) for n in neighbors], lag_ratio=0.12),
+            run_time=2.2
+        ) # Total 5.5s
+        
+        self.play(FadeOut(sweep_circle), FadeIn(cases), run_time=0.8) # Total 6.3s
 
-        # Target = 13.66s. Anim play = 0.6 + 0.8 + 1.0 + 0.5 + 1.2 + 0.8 = 4.9s. FadeOut = 1.0s. Need 7.76s wait.
-        self.wait(7.76)
+        # Target = 13.66s. Play = 6.3s. Need 13.66s - 6.3s - 1.0s (FadeOut) = 6.36s.
+        self.wait(6.36)
         self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+        self.wait(0.8)
 
-    # ─── MÔ PHỎNG XỬ LÝ ẢNH ───────────────────────────────────────────────────
+    # ─── MÔ PHỎNG XỬ LÝ ẢNH (ẢNH MINH HỌA ĐƯỜNG VÂN CHO CÁC CARD) ───────────
 
     def _create_grayscale_sim(self):
-        """Tạo ảnh xám giả lập."""
+        """Mô phỏng đường vân xám nhiễu nhẹ."""
         g = VGroup()
-        for i in range(5):
-            y = (i - 2) * 0.22
-            g.add(Line(LEFT * 0.9 + UP * y, RIGHT * 0.9 + UP * y, color=TEXT_DIM, stroke_width=6).set_opacity(0.4))
+        for idx in range(5):
+            y = (idx - 2) * 0.22
+            g.add(Line(LEFT * 0.85 + UP * y, RIGHT * 0.85 + UP * y, color=TEXT_DIM, stroke_width=6).set_opacity(0.35))
+        # Dấu chấm nhiễu xung quanh
+        for _ in range(8):
+            g.add(Dot([np.random.uniform(-0.8, 0.8), np.random.uniform(-0.5, 0.5), 0], color=TEXT_DIM, radius=0.03).set_opacity(0.3))
         return g
 
     def _create_enhanced_sim(self):
-        """Tạo ảnh tăng cường giả lập."""
+        """Mô phỏng đường vân đã tăng cường rõ nét."""
         g = VGroup()
-        for i in range(5):
-            y = (i - 2) * 0.22
-            g.add(Line(LEFT * 0.9 + UP * y, RIGHT * 0.9 + UP * y, color=TEXT_COLOR, stroke_width=6))
+        for idx in range(5):
+            y = (idx - 2) * 0.22
+            g.add(Line(LEFT * 0.85 + UP * y, RIGHT * 0.85 + UP * y, color=TEXT_COLOR, stroke_width=6.5))
         return g
 
     def _create_binary_sim(self):
-        """Tạo ảnh nhị phân giả lập."""
+        """Mô phỏng đường vân nhị phân thuần tuý 2 màu."""
         g = VGroup()
-        for i in range(5):
-            y = (i - 2) * 0.22
-            g.add(Line(LEFT * 0.9 + UP * y, RIGHT * 0.9 + UP * y, color=CHART_BLUE, stroke_width=4))
+        for idx in range(5):
+            y = (idx - 2) * 0.22
+            g.add(Line(LEFT * 0.85 + UP * y, RIGHT * 0.85 + UP * y, color=CHART_BLUE, stroke_width=5.0))
         return g
 
     def _create_thinned_sim(self):
-        """Tạo ảnh thon hóa (xương) giả lập."""
+        """Mô phỏng đường xương vân mảnh 1-pixel."""
         g = VGroup()
-        for i in range(5):
-            y = (i - 2) * 0.22
-            g.add(Line(LEFT * 0.9 + UP * y, RIGHT * 0.9 + UP * y, color=CORE_POINT, stroke_width=1.5))
+        for idx in range(5):
+            y = (idx - 2) * 0.22
+            g.add(Line(LEFT * 0.85 + UP * y, RIGHT * 0.85 + UP * y, color=CORE_POINT, stroke_width=1.6))
         return g

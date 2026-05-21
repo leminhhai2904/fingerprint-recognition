@@ -3,6 +3,8 @@ Scene 2: Thu nhận vân tay (Fingerprint Sensing)
 - So sánh thu nhận ngoại tuyến (Off-line) vs quét trực tiếp (Live-scan)
 - Nguyên lý cảm biến quang học: Phản xạ toàn phần bị chặn (FTIR) + Trích hạt sáng
 - So sánh 3 công nghệ cảm biến: Quang học (Optical), Bán dẫn (Solid-state), Siêu âm (Ultrasound)
+  + Demo phóng to cảm biến điện dung (Capacitive sensor zoom-in)
+  + Hiệu ứng sóng siêu âm truyền và phản hồi
 - Thách thức & Công nghệ tương lai (Quét đa phổ, Quét 3D không tiếp xúc, Quy chuẩn FBI CJIS)
 """
 from manim import *
@@ -205,7 +207,7 @@ class Scene02Sensing(Scene):
         )
         self.play(GrowArrow(ridge_arrow), FadeIn(ridge_label), run_time=0.8)
 
-        # Trace photons along the rays (Premium effect)
+        # Trace photons along the rays
         photon_valley = Dot(color=OPTICAL_COLOR, radius=0.08)
         photon_ridge = Dot(color=OPTICAL_COLOR, radius=0.08)
 
@@ -224,7 +226,7 @@ class Scene02Sensing(Scene):
 
         self.play(FadeIn(explanation, shift=UP * 0.2), run_time=0.8)
 
-        # Target 17.64s. Total play so far = 1.2 + 0.5 + 1.2 + 0.8 + 1.0 + 1.2 + 0.2 + 1.0 + 0.8 + 0.8 + 0.5 + 0.8 = 10.0s.
+        # Target 17.64s. Total play so far = 10.0s. Need 6.64s wait.
         self.wait(6.64)
         self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
         self.wait(0.8) # Silence gap
@@ -271,15 +273,94 @@ class Scene02Sensing(Scene):
 
         cards.arrange(RIGHT, buff=0.35).shift(DOWN * 0.3)
 
-        # Target = 23.23s.
+        # 1. Fade in Optical card (0.0s - 0.8s)
         self.play(FadeIn(cards[0], shift=UP * 0.5), run_time=0.8)
-        self.wait(3.5)
-        self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.8)
-        self.wait(6.5)
-        self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.8)
-        self.wait(9.23)
+        self.wait(3.5) # Total 4.3s
 
-        self.play(FadeOut(VGroup(section, cards)), run_time=1.0)
+        # 2. Fade in Solid-state card (4.3s - 5.1s)
+        self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.8)
+        self.wait(1.0) # Total 6.1s
+
+        # --- CAPACITIVE SENSOR ZOOM-IN POP-UP TRANSITION ---
+        # Shift the two cards out of the center
+        self.play(
+            cards[0].animate.scale(0.6).to_edge(LEFT, buff=0.4).shift(UP * 0.8).set_opacity(0.4),
+            cards[1].animate.scale(0.6).to_edge(RIGHT, buff=0.4).shift(UP * 0.8).set_opacity(0.4),
+            run_time=1.0
+        ) # Total 7.1s
+
+        # Build detailed capacitive schematic
+        popup_box = create_rounded_box(width=8.0, height=4.2, fill_color=SECONDARY, fill_opacity=0.15, stroke_color=CHART_BLUE, stroke_width=2).shift(DOWN * 0.4)
+        popup_title = self.ct("Cơ chế Cảm biến Điện dung (Capacitive)", font_size=16, color=CHART_BLUE, weight=BOLD).next_to(popup_box.get_top(), DOWN, buff=0.2)
+        
+        silicon = Line(LEFT * 3.0, RIGHT * 3.0, color="#555555", stroke_width=4).shift(popup_box.get_center() + DOWN * 0.8)
+        silicon_lbl = self.ct("Bề mặt Silicon", font_size=11, color=TEXT_DIM).next_to(silicon, DOWN, buff=0.1)
+        
+        e1 = Square(side_length=0.4, color=PRIMARY, fill_color=PRIMARY, fill_opacity=0.3, stroke_width=1).move_to(silicon.get_center() + LEFT * 1.5 + UP * 0.2)
+        e2 = Square(side_length=0.4, color=PRIMARY, fill_color=PRIMARY, fill_opacity=0.3, stroke_width=1).move_to(silicon.get_center() + RIGHT * 1.5 + UP * 0.2)
+        e1_lbl = self.ct("Điện cực 1 (Ridge)", font_size=9, color=PRIMARY).next_to(e1, DOWN, buff=0.05)
+        e2_lbl = self.ct("Điện cực 2 (Valley)", font_size=9, color=PRIMARY).next_to(e2, DOWN, buff=0.05)
+        
+        skin_path = VMobject()
+        skin_path.set_points_smoothly([
+            silicon.get_center() + LEFT * 2.8 + UP * 0.3,
+            silicon.get_center() + LEFT * 1.5 + UP * 0.21,  # Ridge touches
+            silicon.get_center() + ORIGIN + UP * 1.3,
+            silicon.get_center() + RIGHT * 1.5 + UP * 1.0, # Valley floats above
+            silicon.get_center() + RIGHT * 2.8 + UP * 1.1,
+        ])
+        skin_path.set_stroke(color="#d4a574", width=3)
+        skin_lbl = self.ct("Lớp da ngón tay", font_size=11, color="#d4a574").next_to(skin_path.get_top(), UP, buff=0.05)
+        
+        c1_lbl = MathTex(r"C_{\text{High}}", font_size=20, color=MATCH_COLOR).next_to(e1, UP, buff=0.1)
+        c2_lbl = MathTex(r"C_{\text{Low}}", font_size=20, color=MISMATCH_COLOR).next_to(e2, UP, buff=0.1)
+        
+        # Charges
+        charge_plus1 = self.ct("+", font_size=12, color=MATCH_COLOR).move_to(e1.get_center())
+        charge_plus2 = self.ct("+", font_size=8, color=MISMATCH_COLOR).move_to(e2.get_center())
+        charge_minus1 = self.ct("-", font_size=12, color=MATCH_COLOR).move_to(silicon.get_center() + LEFT * 1.5 + UP * 0.25)
+        charge_minus2 = self.ct("-", font_size=8, color=MISMATCH_COLOR).move_to(silicon.get_center() + RIGHT * 1.5 + UP * 0.9)
+        
+        charges = VGroup(charge_plus1, charge_plus2, charge_minus1, charge_minus2)
+        capacitive_popup = VGroup(popup_box, popup_title, silicon, silicon_lbl, e1, e2, e1_lbl, e2_lbl, skin_path, skin_lbl, c1_lbl, c2_lbl, charges)
+
+        self.play(FadeIn(popup_box), FadeIn(popup_title), run_time=0.6) # Total 7.7s
+        self.play(Create(silicon), FadeIn(silicon_lbl), Create(e1), Create(e2), FadeIn(e1_lbl), FadeIn(e2_lbl), run_time=0.9) # Total 8.6s
+        self.play(Create(skin_path), FadeIn(skin_lbl), run_time=0.8) # Total 9.4s
+        self.play(FadeIn(c1_lbl), FadeIn(c2_lbl), FadeIn(charges), run_time=0.7) # Total 10.1s
+        self.play(Indicate(c1_lbl, color=MATCH_COLOR, scale_factor=1.3), run_time=0.8) # Total 10.9s
+        self.wait(1.2) # Total 12.1s
+
+        # Fade out pop-up and restore layout
+        self.play(
+            FadeOut(capacitive_popup),
+            cards[0].animate.scale(1/0.6).move_to(cards[0].get_center()).set_opacity(1.0),
+            cards[1].animate.scale(1/0.6).move_to(cards[1].get_center()).set_opacity(1.0),
+            run_time=1.0
+        ) # Total 13.1s
+
+        # 3. Fade in Ultrasound card (13.1s - 13.9s)
+        self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.8) # Total 13.9s
+
+        # Animate ultrasound waves inside card 3
+        wave_center = cards[2].get_center() + DOWN * 0.8
+        waves_up = VGroup()
+        for i in range(3):
+            arc = Arc(radius=0.25 + i * 0.25, start_angle=PI/6, angle=2*PI/3, color=CHART_BLUE, stroke_width=2.0).move_to(wave_center, aligned_edge=DOWN)
+            waves_up.add(arc)
+            
+        waves_down = VGroup()
+        for i in range(3):
+            arc = Arc(radius=0.75 - i * 0.25, start_angle=PI/6, angle=2*PI/3, color=CHART_ORANGE, stroke_width=1.5).move_to(wave_center, aligned_edge=DOWN)
+            d_arc = DashedVMobject(arc, num_dashes=6)
+            waves_down.add(d_arc)
+
+        self.play(LaggedStart(*[Create(w) for w in waves_up], lag_ratio=0.25), run_time=1.2) # Total 15.1s
+        self.play(LaggedStart(*[Create(w) for w in waves_down], lag_ratio=0.25), run_time=1.2) # Total 16.3s
+
+        # Target = 23.23s. FadeOut = 1.0s. Wait remaining: 23.23s - 16.3s - 1.0s = 5.93s.
+        self.wait(5.93)
+        self.play(FadeOut(VGroup(section, cards, waves_up, waves_down)), run_time=1.0)
         self.wait(0.8) # Silence gap
 
     def new_tech_and_challenges(self):
@@ -326,6 +407,6 @@ class Scene02Sensing(Scene):
         self.wait(5.0)
         self.play(FadeIn(right_group, shift=LEFT * 0.3), run_time=0.8)
 
-        # Target = 15.31s. Total play so far = 0.6 + 0.8 + 5.0 + 0.8 = 7.2s.
+        # Target = 15.31s. Total play so far = 0.6 + 0.8 + 5.0 + 0.8 = 7.2s. Remaining wait: 15.31s - 7.2s - 1.0s = 7.11s.
         self.wait(7.11)
         self.play(FadeOut(VGroup(section, both)), run_time=1.0)
