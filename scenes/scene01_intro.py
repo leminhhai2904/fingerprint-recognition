@@ -16,6 +16,7 @@ from utils.styles import *
 from utils.fingerprint_mobjects import *
 
 
+class Scene01Intro(Scene):
     def construct(self):
         scene_setup(self)
         self.intro_title()
@@ -351,7 +352,7 @@ from utils.fingerprint_mobjects import *
         labels = VGroup()
 
         # Wait times for timeline elements (aligned with historical overview narration)
-        wait_times = [1.2, 1.8, 1.8, 1.8, 1.8]
+        wait_times = [2.24, 2.0, 2.0, 2.86, 4.22]
 
         for i, (x, year, desc, color) in enumerate(events):
             dot = Dot(point=np.array([x, -0.2, 0]), color=color, radius=0.1)
@@ -378,7 +379,7 @@ from utils.fingerprint_mobjects import *
             self.wait(wait_times[i])
 
         # At this point, we fade out the timeline and show the forensic/civilian applications
-        self.play(FadeOut(VGroup(timeline_line, dots, labels)), run_time=0.8)
+        self.play(FadeOut(VGroup(timeline_line, dots, labels)), run_time=0.5)
 
         # 1. Forensic / Criminal Application (FBI) Panel
         forensic_title = self.ct("Ứng Dụng Pháp Y & Hình Sự", font_size=22, color=CHART_ORANGE, weight=BOLD)
@@ -404,14 +405,14 @@ from utils.fingerprint_mobjects import *
         self.play(
             FadeIn(forensic_title, shift=DOWN * 0.2),
             FadeIn(fbi_panel, shift=UP * 0.3),
-            run_time=0.8
+            run_time=0.5
         )
-        self.wait(3.5)
+        self.wait(2.0)
 
         self.play(
             FadeOut(forensic_title, shift=UP * 0.2),
             FadeOut(fbi_panel, shift=DOWN * 0.2),
-            run_time=0.8
+            run_time=0.5
         )
 
         # 2. Civilian Applications Panel
@@ -455,7 +456,7 @@ from utils.fingerprint_mobjects import *
         
         self.play(
             FadeIn(civil_title, shift=DOWN * 0.2),
-            run_time=0.5
+            run_time=0.3
         )
         self.play(
             LaggedStart(
@@ -464,14 +465,11 @@ from utils.fingerprint_mobjects import *
                 FadeIn(app3_group, shift=UP * 0.3),
                 lag_ratio=0.2
             ),
-            run_time=1.0
+            run_time=0.7
         )
 
-        # Target duration: 26.78s.
-        # Timeline draw elapsed: 0.6 (section) + 0.8 (line) + 5 * 0.5 (anim) + (1.2 + 1.8*4) (waits) = 12.3s.
-        # Fadeout timeline: 0.8s. (Total 13.1s)
-        # FBI presentation: 0.8s (in) + 3.5s (wait) + 0.8s (out) = 5.1s. (Total 18.2s)
-        # Civilian presentation: 0.5s (title) + 1.0s (apps) = 1.5s. (Total 19.7s)
-        # Wait remaining: 26.78s - 19.7s - 1.0s (FadeOut) = 6.08s.
-        self.wait(6.08)
+        # Target duration: 24.06s.
+        # Accumulated so far: 21.72s.
+        # Wait remaining: 24.06s - 21.72s - 1.0s (FadeOut) = 1.34s.
+        self.wait(1.34)
         self.play(FadeOut(VGroup(section, civil_title, civil_apps)), run_time=1.0)
