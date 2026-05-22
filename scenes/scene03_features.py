@@ -70,13 +70,13 @@ class Scene03Features(Scene):
         # Total 5.0s
 
         # 3. Labeling Ridge and Valley (5.0s - 6.0s)
-        ridge_lbl = self.ct("Đường vân (Ridge) - Tối", font_size=13, color=TEXT_BRIGHT)
+        ridge_lbl = self.ct("Đường vân - Tối", font_size=13, color=TEXT_BRIGHT)
         ridge_lbl.move_to(box.get_top() + UP * 0.45 + LEFT * 0.8)
-        ridge_arrow = Arrow(start=ridge_lbl.get_bottom() + RIGHT * 0.2, end=box.get_center() + UP * 1.0, color=PRIMARY, buff=0.1, stroke_width=2, max_tip_length_to_length_ratio=0.15)
+        ridge_arrow = Arrow(start=ridge_lbl.get_bottom() + RIGHT * 0.2, end=box.get_center() + UP * 1.0, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
         
-        valley_lbl = self.ct("Rãnh (Valley) - Sáng", font_size=13, color=TEXT_BRIGHT)
+        valley_lbl = self.ct("Rãnh - Sáng", font_size=13, color=TEXT_BRIGHT)
         valley_lbl.move_to(box.get_bottom() + DOWN * 0.45 + RIGHT * 0.8)
-        valley_arrow = Arrow(start=valley_lbl.get_top() - RIGHT * 0.2, end=box.get_center() + UP * 0.65, color=PRIMARY, buff=0.1, stroke_width=2, max_tip_length_to_length_ratio=0.15)
+        valley_arrow = Arrow(start=valley_lbl.get_top() - RIGHT * 0.2, end=box.get_center() + LEFT * 0.6 + DOWN * 0.65, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
         
         self.play(Create(ridge_arrow), FadeIn(ridge_lbl), Create(valley_arrow), FadeIn(valley_lbl), run_time=1.0)
         # Total 6.0s
@@ -101,7 +101,7 @@ class Scene03Features(Scene):
 
     def singularities(self):
         """Singularities (Loop, Delta, Whorl) — Segment 2 = 16.54s."""
-        section = self.get_section_hdr("Điểm đặc biệt hệ thống (Singularities)")
+        section = self.get_section_hdr("Điểm đặc biệt hệ thống")
         section.to_edge(UP, buff=0.6)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
@@ -112,26 +112,26 @@ class Scene03Features(Scene):
 
         # ── 1. Loop (Móc) ──
         loop_box = create_rounded_box(width=3.4, height=3.4, fill_color=CHART_BLUE, fill_opacity=0.08, stroke_color=CHART_BLUE, stroke_width=1.5)
-        loop = create_loop_pattern(scale=1.5, color=RIDGE_COLOR, stroke_width=3).move_to(loop_box.get_center())
-        loop_lbl = self.ct("Loop (Vòng lặp) - ∩", font_size=15, color=TEXT_BRIGHT, weight=BOLD)
-        core_dot = Dot(loop.get_center() + UP * 0.1 * 1.5, color=CORE_POINT, radius=0.08 * 1.5)
-        core_lbl = self.ct("Core (Tâm)", font_size=12, color=CORE_POINT, weight=BOLD).next_to(core_dot, UP, buff=0.1)
+        loop = SVGMobject("assets/features/loop.svg").set_color(RIDGE_COLOR).scale(1.20).move_to(loop_box.get_center())
+        loop_lbl = self.ct("Loop", font_size=15, color=TEXT_BRIGHT, weight=BOLD)
+        core_dot = Dot(loop.get_center() + UP * 0.125, color=CORE_POINT, radius=0.08 * 1.5)
+        core_lbl = self.ct("Core", font_size=12, color=CORE_POINT, weight=BOLD).next_to(core_dot, UP, buff=0.12).add_background_rectangle(color=BG_COLOR, opacity=0.85, buff=0.04)
         loop_group = VGroup(loop_box, loop, core_dot, core_lbl, loop_lbl)
 
         # ── 2. Delta (Tam sa) ──
         delta_box = create_rounded_box(width=3.4, height=3.4, fill_color=CHART_ORANGE, fill_opacity=0.08, stroke_color=CHART_ORANGE, stroke_width=1.5)
-        delta = create_delta_pattern(scale=1.5, color=RIDGE_COLOR, stroke_width=3).move_to(delta_box.get_center())
-        delta_lbl_name = self.ct("Delta (Tam giác) - ∆", font_size=15, color=TEXT_BRIGHT, weight=BOLD)
-        delta_dot = Dot(delta.get_center() + DOWN * 0.1 * 1.5, color=DELTA_COLOR, radius=0.08 * 1.5)
-        delta_lbl = self.ct("Delta (Giao điểm)", font_size=12, color=DELTA_COLOR, weight=BOLD).next_to(delta_dot, DOWN, buff=0.1)
+        delta = SVGMobject("assets/features/delta.svg").set_color(RIDGE_COLOR).scale(1.20).move_to(delta_box.get_center())
+        delta_lbl_name = self.ct("Delta", font_size=15, color=TEXT_BRIGHT, weight=BOLD)
+        delta_dot = Dot(delta.get_center() + DOWN * 0.1 + LEFT * 0.1, color=DELTA_COLOR, radius=0.08 * 1.5)
+        delta_lbl = self.ct("Delta", font_size=12, color=DELTA_COLOR, weight=BOLD).next_to(delta_dot, DOWN, buff=0.12).add_background_rectangle(color=BG_COLOR, opacity=0.85, buff=0.04)
         delta_group = VGroup(delta_box, delta, delta_dot, delta_lbl, delta_lbl_name)
 
         # ── 3. Whorl (Xoáy) ──
         whorl_box = create_rounded_box(width=3.4, height=3.4, fill_color=CHART_PURPLE, fill_opacity=0.08, stroke_color=CHART_PURPLE, stroke_width=1.5)
-        whorl = create_whorl_pattern(scale=1.5, color=RIDGE_COLOR, stroke_width=3).move_to(whorl_box.get_center())
-        whorl_lbl = self.ct("Whorl (Xoáy) - O", font_size=15, color=TEXT_BRIGHT, weight=BOLD)
-        whorl_dot = Dot(whorl.get_center(), color=CORE_POINT, radius=0.08 * 1.5)
-        whorl_lbl_node = self.ct("Core (Tâm)", font_size=12, color=CORE_POINT, weight=BOLD).next_to(whorl_dot, UP, buff=0.1)
+        whorl = SVGMobject("assets/features/whorl.svg").set_color(RIDGE_COLOR).scale(1.20).move_to(whorl_box.get_center())
+        whorl_lbl = self.ct("Whorl", font_size=15, color=TEXT_BRIGHT, weight=BOLD)
+        whorl_dot = Dot(whorl.get_center() + RIGHT * 0.1, color=CORE_POINT, radius=0.08 * 1.5)
+        whorl_lbl_node = self.ct("Core", font_size=12, color=CORE_POINT, weight=BOLD).next_to(whorl_dot, UP, buff=0.12).add_background_rectangle(color=BG_COLOR, opacity=0.85, buff=0.04)
         whorl_group = VGroup(whorl_box, whorl, whorl_dot, whorl_lbl_node, whorl_lbl)
 
         all_singular = VGroup(loop_group, delta_group, whorl_group)
@@ -173,10 +173,11 @@ class Scene03Features(Scene):
         # Total 5.4s
 
         # Create elements for normalization demo
-        demo_title = self.ct("Chuẩn hóa Vân tay qua Điểm Core", font_size=20, color=TEXT_BRIGHT, weight=BOLD).shift(LEFT * 3.5 + UP * 1.2)
+        demo_title = self.ct("Chuẩn hóa vân tay qua điểm Core", font_size=20, color=TEXT_BRIGHT, weight=BOLD).shift(LEFT * 3.5 + UP * 1.2)
         demo_desc = self.ct(
             "Xác định mốc Core để chuẩn hóa\nvị trí và hướng của vân tay,\ngiúp tối ưu hóa việc so khớp.", 
             font_size=15, 
+            line_spacing=1.25,
             color=TEXT_DIM
         ).next_to(demo_title, DOWN, buff=0.4, aligned_edge=LEFT)
         
@@ -237,7 +238,7 @@ class Scene03Features(Scene):
         # ── 1. Card Kết thúc (Termination) ──
         term_box = create_rounded_box(width=3.6, height=3.2, fill_color=CHART_BLUE, fill_opacity=0.06, stroke_color=CHART_BLUE, stroke_width=1.5)
         term_box.shift(LEFT * 4.2 + DOWN * 0.4)
-        term_title = self.ct("Kết thúc (Termination)", font_size=16, color=MINUTIA_TERM, weight=BOLD)
+        term_title = self.ct("Kết thúc", font_size=16, color=MINUTIA_TERM, weight=BOLD)
         term_title.next_to(term_box, UP, buff=0.2)
         
         term_ridges = VGroup()
@@ -258,7 +259,7 @@ class Scene03Features(Scene):
         # ── 2. Card Phân nhánh (Bifurcation) ──
         bifur_box = create_rounded_box(width=3.6, height=3.2, fill_color=CHART_ORANGE, fill_opacity=0.06, stroke_color=CHART_ORANGE, stroke_width=1.5)
         bifur_box.shift(DOWN * 0.4)
-        bifur_title = self.ct("Phân nhánh (Bifurcation)", font_size=16, color=MINUTIA_BIFUR, weight=BOLD)
+        bifur_title = self.ct("Phân nhánh", font_size=16, color=MINUTIA_BIFUR, weight=BOLD)
         bifur_title.next_to(bifur_box, UP, buff=0.2)
         
         bifur_ridges = VGroup()
@@ -282,7 +283,7 @@ class Scene03Features(Scene):
         # ── 3. Card Loại khác (Others) ──
         others_box = create_rounded_box(width=3.6, height=3.2, fill_color=CHART_PURPLE, fill_opacity=0.06, stroke_color=TEXT_DIM, stroke_width=1.5)
         others_box.shift(RIGHT * 4.2 + DOWN * 0.4)
-        others_title = self.ct("Loại khác (Others)", font_size=16, color=TEXT_DIM, weight=BOLD)
+        others_title = self.ct("Loại khác", font_size=16, color=TEXT_DIM, weight=BOLD)
         others_title.next_to(others_box, UP, buff=0.2)
         
         # Bridge & Island representation
@@ -387,17 +388,11 @@ class Scene03Features(Scene):
             run_time=1.5,
         ) # Total 3.1s
 
-        # Laser Scan effect on grid (3.1s - 4.3s)
-        scan_line = Line(axes.get_left() + UP * 2.0, axes.get_right() + UP * 2.0, color=PRIMARY, stroke_width=2.5).set_opacity(0.8)
-        self.add(scan_line)
-        self.play(scan_line.animate.move_to(axes.get_center() + DOWN * 2.0), run_time=1.2, rate_func=smooth)
-        self.play(FadeOut(scan_line), run_time=0.1) # Total 4.4s
-
-        # Highlight point 0: (2, 3, PI/4) (4.4s - 5.1s)
+        # Highlight point 0: (2, 3, PI/4) (3.1s - 3.8s)
         pt0_pos = axes.c2p(2, 3)
-        self.play(Indicate(points[0], color=PRIMARY, scale_factor=1.8), run_time=0.7) # Total 5.1s
+        self.play(Indicate(points[0], color=PRIMARY, scale_factor=1.8), run_time=0.7) # Total 3.8s
 
-        # Projection lines and angle arc for the highlighted minutia (5.1s - 6.3s)
+        # Projection lines and angle arc for the highlighted minutia (3.8s - 5.0s)
         proj_x = DashedLine(pt0_pos, axes.c2p(2, 0), color=MINUTIA_TERM, stroke_width=2)
         proj_y = DashedLine(pt0_pos, axes.c2p(0, 3), color=MINUTIA_TERM, stroke_width=2)
         ref_line = DashedLine(pt0_pos, pt0_pos + RIGHT * 0.8, color=TEXT_DIM, stroke_width=1.5)
@@ -416,18 +411,18 @@ class Scene03Features(Scene):
             Create(proj_x), Create(proj_y), Create(ref_line), 
             Create(theta_arc), FadeIn(theta_lbl), 
             run_time=1.2
-        ) # Total 6.3s
+        ) # Total 5.0s
 
-        # Formula and example - right side (6.3s - 7.1s)
+        # Formula and example - right side (5.0s - 5.8s)
         formula = MathTex(r"m = \{x,\; y,\; \theta\}", font_size=42, color=TEXT_BRIGHT)
         formula.shift(RIGHT * 3.4 + UP * 1.4)
         
         example = MathTex(r"m_1 = \{2.0,\; 3.0,\; 45^\circ\}", font_size=32, color=PRIMARY)
         example.next_to(formula, DOWN, buff=0.25)
         
-        self.play(Write(formula), Write(example), run_time=0.8) # Total 7.1s
+        self.play(Write(formula), Write(example), run_time=0.8) # Total 5.8s
 
-        # Explanatory descriptions (7.1s - 7.7s)
+        # Explanatory descriptions (5.8s - 6.4s)
         desc_xy = VGroup(
             MathTex(r"(x,\, y)", font_size=24, color=MINUTIA_TERM),
             self.ct("= tọa độ vị trí", font_size=18, color=TEXT_DIM),
@@ -440,22 +435,22 @@ class Scene03Features(Scene):
         
         descs = VGroup(desc_xy, desc_th).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
         descs.next_to(example, DOWN, buff=0.45)
-        self.play(FadeIn(descs, shift=UP * 0.15), run_time=0.6) # Total 7.7s
+        self.play(FadeIn(descs, shift=UP * 0.15), run_time=0.6) # Total 6.4s
 
-        # Legend/Color guide (7.7s - 8.3s)
+        # Legend/Color guide (6.4s - 7.0s)
         legend = VGroup(
             VGroup(
                 Dot(color=MINUTIA_TERM, radius=0.07),
-                self.ct("Kết thúc (Termination)", font_size=14, color=MINUTIA_TERM),
+                self.ct("Kết thúc", font_size=14, color=MINUTIA_TERM),
             ).arrange(RIGHT, buff=0.15),
             VGroup(
                 Dot(color=MINUTIA_BIFUR, radius=0.07),
-                self.ct("Phân nhánh (Bifurcation)", font_size=14, color=MINUTIA_BIFUR),
+                self.ct("Phân nhánh", font_size=14, color=MINUTIA_BIFUR),
             ).arrange(RIGHT, buff=0.15),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
         legend.next_to(descs, DOWN, buff=0.4)
-        self.play(FadeIn(legend), run_time=0.6) # Total 8.3s
+        self.play(FadeIn(legend), run_time=0.6) # Total 7.0s
 
-        # Target Segment 4 = 10.61s. FadeOut = 0.8s. Need wait: 10.61 - 8.3 - 0.8 = 1.51s.
-        self.wait(1.51)
+        # Target Segment 4 = 10.61s. FadeOut = 0.8s. Need wait: 10.61 - 7.0 - 0.8 = 2.81s.
+        self.wait(2.81)
         self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
