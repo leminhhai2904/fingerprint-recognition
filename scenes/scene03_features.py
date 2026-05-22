@@ -40,7 +40,7 @@ class Scene03Features(Scene):
         """Tiêu đề mục — Segment 1 = 11.23s."""
         num = self.ct("02", font_size=80, color=PRIMARY, weight=BOLD, font="Consolas")
         title = self.ct("Trích Xuất Đặc Trưng", font_size=42, color=TEXT_BRIGHT, weight=BOLD)
-        subtitle = self.ct("Từ hình dạng vĩ mô đến chi tiết vi mô cục bộ", font_size=20, color=TEXT_DIM)
+        subtitle = self.ct("Phân tích đặc tính toàn cục và cục bộ", font_size=20, color=TEXT_DIM)
         group = VGroup(num, title, subtitle).arrange(DOWN, aligned_edge=LEFT, buff=0.3).shift(LEFT * 3.2)
 
         # 1. Left side title group fades in (0.0s - 2.5s)
@@ -101,7 +101,7 @@ class Scene03Features(Scene):
 
     def singularities(self):
         """Singularities (Loop, Delta, Whorl) — Segment 2 = 16.54s."""
-        section = self.get_section_hdr("Điểm đặc biệt hệ thống")
+        section = self.get_section_hdr("Điểm kỳ dị")
         section.to_edge(UP, buff=0.6)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
@@ -226,7 +226,7 @@ class Scene03Features(Scene):
 
     def minutiae_types(self):
         """Minutiae Termination & Bifurcation — Segment 3 = 14.35s."""
-        section = self.get_section_hdr("Minutiae: Đặc trưng cục bộ")
+        section = self.get_section_hdr("Minutiae: Điểm đặc trưng cục bộ")
         section.to_edge(UP, buff=0.6)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
@@ -238,7 +238,7 @@ class Scene03Features(Scene):
         # ── 1. Card Kết thúc (Termination) ──
         term_box = create_rounded_box(width=3.6, height=3.2, fill_color=CHART_BLUE, fill_opacity=0.06, stroke_color=CHART_BLUE, stroke_width=1.5)
         term_box.shift(LEFT * 4.2 + DOWN * 0.4)
-        term_title = self.ct("Kết thúc", font_size=16, color=MINUTIA_TERM, weight=BOLD)
+        term_title = self.ct("Điểm kết thúc", font_size=16, color=MINUTIA_TERM, weight=BOLD)
         term_title.next_to(term_box, UP, buff=0.2)
         
         term_ridges = VGroup()
@@ -259,7 +259,7 @@ class Scene03Features(Scene):
         # ── 2. Card Phân nhánh (Bifurcation) ──
         bifur_box = create_rounded_box(width=3.6, height=3.2, fill_color=CHART_ORANGE, fill_opacity=0.06, stroke_color=CHART_ORANGE, stroke_width=1.5)
         bifur_box.shift(DOWN * 0.4)
-        bifur_title = self.ct("Phân nhánh", font_size=16, color=MINUTIA_BIFUR, weight=BOLD)
+        bifur_title = self.ct("Điểm rẽ nhánh", font_size=16, color=MINUTIA_BIFUR, weight=BOLD)
         bifur_title.next_to(bifur_box, UP, buff=0.2)
         
         bifur_ridges = VGroup()
@@ -296,7 +296,7 @@ class Scene03Features(Scene):
         i_ridge1 = Line(LEFT * 0.8 + DOWN * 0.5, LEFT * 0.3 + DOWN * 0.5, color=RIDGE_COLOR, stroke_width=3)
         i_island = Circle(radius=0.12, color=RIDGE_COLOR, stroke_width=3).move_to(DOWN * 0.5)
         i_ridge2 = Line(RIGHT * 0.3 + DOWN * 0.5, RIGHT * 0.8 + DOWN * 0.5, color=RIDGE_COLOR, stroke_width=3)
-        i_lbl = self.ct("Đảo nhỏ", font_size=10, color=TEXT_DIM).next_to(i_ridge2, DOWN, buff=0.05)
+        i_lbl = self.ct("Đảo nhỏ", font_size=10, color=TEXT_DIM).next_to(i_island, DOWN, buff=0.05)
         island_group = VGroup(i_ridge1, i_island, i_ridge2, i_lbl)
         
         others_ridges = VGroup(bridge_group, island_group)
@@ -441,11 +441,11 @@ class Scene03Features(Scene):
         legend = VGroup(
             VGroup(
                 Dot(color=MINUTIA_TERM, radius=0.07),
-                self.ct("Kết thúc", font_size=14, color=MINUTIA_TERM),
+                self.ct("Điểm kết thúc", font_size=14, color=MINUTIA_TERM),
             ).arrange(RIGHT, buff=0.15),
             VGroup(
                 Dot(color=MINUTIA_BIFUR, radius=0.07),
-                self.ct("Phân nhánh", font_size=14, color=MINUTIA_BIFUR),
+                self.ct("Điểm rẽ nhánh", font_size=14, color=MINUTIA_BIFUR),
             ).arrange(RIGHT, buff=0.15),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
         legend.next_to(descs, DOWN, buff=0.4)

@@ -239,7 +239,7 @@ class Scene02Sensing(Scene):
 
         sensors = [
             ("Cảm biến Quang học", OPTICAL_COLOR, [
-                "Nguyên lý: Phản xạ toàn phần bị chặn",
+                "Nguyên lý: Phản xạ toàn phần bị suy giảm",
                 "Ưu điểm: Độ bền vật lý cao, diện tích lớn",
                 "Nhược điểm: Cồng kềnh, dễ bị đánh lừa"
             ]),
