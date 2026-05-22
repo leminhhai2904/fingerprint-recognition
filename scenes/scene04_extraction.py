@@ -43,7 +43,7 @@ class Scene04Extraction(Scene):
         """Tiêu đề mục — Segment 1 = 5.76s."""
         num = self.ct("03", font_size=80, color=PRIMARY, weight=BOLD, font="Consolas")
         title = self.ct("Trích Xuất Đặc Trưng", font_size=44, color=TEXT_BRIGHT, weight=BOLD)
-        subtitle = self.ct("Các thuật toán xử lý ảnh vân tay số", font_size=22, color=TEXT_DIM)
+        subtitle = self.ct("Các thuật toán xử lý ảnh và nhị phân hóa", font_size=22, color=TEXT_DIM)
         group = VGroup(num, title, subtitle).arrange(DOWN, buff=0.4)
 
         self.play(FadeIn(num, scale=1.5), run_time=0.5)
@@ -62,7 +62,7 @@ class Scene04Extraction(Scene):
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
 
         # 1. Trường hướng (Trái)
-        orient_label = self.ct("Trường Hướng (Orientation Field)", font_size=16, color=CHART_BLUE, weight=BOLD)
+        orient_label = self.ct("Trường hướng đường vân", font_size=16, color=CHART_BLUE, weight=BOLD)
         field = create_orientation_field(rows=7, cols=9, width=4.5, height=3.2)
         field_box = create_rounded_box(width=5.0, height=3.6, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_BLUE, stroke_width=1.5)
         field.move_to(field_box.get_center())
@@ -70,14 +70,14 @@ class Scene04Extraction(Scene):
         orient_group = VGroup(field_box, field, orient_label).shift(LEFT * 3.3 + DOWN * 0.2)
 
         formula_part = MathTex(r"\theta(x, y)", font_size=26, color=PRIMARY)
-        text_part = self.ct("= hướng cục bộ đường vân", font_size=13, color=TEXT_DIM)
+        text_part = self.ct("= hướng đường vân cục bộ", font_size=13, color=TEXT_DIM)
         orient_formula = VGroup(formula_part, text_part).arrange(RIGHT, buff=0.1).next_to(field_box, DOWN, buff=0.3)
 
         # Quét laser đo góc cục bộ
         scan_bar = Line(field_box.get_left() + UP * 1.6, field_box.get_right() + UP * 1.6, color=PRIMARY, stroke_width=3.5)
 
         # 2. Trường tần số (Phải)
-        freq_label = self.ct("Trường Tần Số (Ridge Frequency)", font_size=16, color=CHART_ORANGE, weight=BOLD)
+        freq_label = self.ct("Trường tần số đường vân", font_size=16, color=CHART_ORANGE, weight=BOLD)
         freq_box = create_rounded_box(width=5.0, height=3.6, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_ORANGE, stroke_width=1.5)
         freq_label.next_to(freq_box, UP, buff=0.2)
 
@@ -93,15 +93,18 @@ class Scene04Extraction(Scene):
         axes = Axes(x_range=[0, 4, 1], y_range=[-1.2, 1.2, 1], x_length=4.2, y_length=1.4, tips=False, axis_config={"include_ticks": False, "stroke_width": 1.0}).move_to(freq_box.get_center() + DOWN * 0.2)
         sin_curve = axes.plot(lambda x: np.sin(2 * np.pi * x * 1.1), x_range=[0, 3.8], color=CHART_ORANGE, stroke_width=2.5)
         
-        brace = Brace(freq_ridges[3:5], DOWN, color=CHART_ORANGE, buff=0.1)
+        # Create a standard-sized brace and scale it down to prevent distortion
+        dummy_line = Line(LEFT * 0.5, RIGHT * 0.5)
+        brace = Brace(dummy_line, DOWN, color=CHART_ORANGE).set_width(0.35)
+        brace.next_to(freq_ridges[3:5], DOWN, buff=0.15)
         spacing_label = self.ct("Khoảng cách d", font_size=11, color=CHART_ORANGE).next_to(brace, DOWN, buff=0.05)
-
-        formula_part_f = MathTex(r"f(x, y) = 1 / d", font_size=26, color=PRIMARY)
-        text_part_f = self.ct("= tần số đường vân", font_size=13, color=TEXT_DIM)
-        freq_formula = VGroup(formula_part_f, text_part_f).arrange(RIGHT, buff=0.1).next_to(freq_box, DOWN, buff=0.3)
 
         freq_group = VGroup(freq_box, freq_ridges, freq_label, axes, sin_curve, brace, spacing_label)
         freq_group.shift(RIGHT * 3.3 + DOWN * 0.2)
+
+        formula_part_f = MathTex(r"f(x, y) = 1 / d", font_size=26, color=PRIMARY)
+        text_part_f = self.ct("= tần số đường vân cục bộ", font_size=13, color=TEXT_DIM)
+        freq_formula = VGroup(formula_part_f, text_part_f).arrange(RIGHT, buff=0.1).next_to(freq_box, DOWN, buff=0.3)
 
         # Hoạt ảnh xuất hiện
         self.play(FadeIn(field_box), FadeIn(orient_label), run_time=0.8) # Total 1.4s
@@ -137,31 +140,60 @@ class Scene04Extraction(Scene):
 
         # Trái: Segmentation Card
         seg_box = create_rounded_box(width=5.0, height=3.5, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_ORANGE, stroke_width=1.5)
-        seg_title = self.ct("Phân vùng (Segmentation)", font_size=16, color=CHART_ORANGE, weight=BOLD)
+        seg_title = self.ct("Phân đoạn", font_size=16, color=CHART_ORANGE, weight=BOLD)
+        seg_title.next_to(seg_box, UP, buff=-0.45)
         
-        # Mô phỏng phân tách vân tay (Foreground) và nhiễu viền (Background)
-        fg_area = Circle(radius=0.8, color=CHART_ORANGE, fill_color=CHART_ORANGE, fill_opacity=0.15, stroke_width=2.5)
-        bg_area = DashedVMobject(Circle(radius=1.2, color=TEXT_DIM, stroke_width=1.5)).set_opacity(0.35)
+        seg_desc = self.ct("Loại bỏ nhiễu nền & tránh đặc trưng giả", font_size=9.5, color=TEXT_COLOR)
+        seg_desc.next_to(seg_box, DOWN, buff=-0.4)
         
-        # Vân tay mô phỏng bên trong vùng fg
-        finger_lines = VGroup()
-        for idx in range(4):
-            arc = Arc(radius=0.15 + idx * 0.18, start_angle=-PI/3, angle=2*PI/3, color=CHART_ORANGE, stroke_width=2.0).move_to(fg_area.get_center())
-            finger_lines.add(arc)
+        # Raw image frame representation
+        raw_img_box = Square(side_length=1.7, color=TEXT_DIM, stroke_width=1.5)
+        
+        # Central fingerprint region (Foreground boundary)
+        fg_boundary = Ellipse(width=1.1, height=1.4, color=CHART_ORANGE, stroke_width=2.5)
+        fg_boundary.set_fill(CHART_ORANGE, opacity=0.12)
+        
+        # Ridges inside the foreground (loaded from SVG)
+        finger_lines = SVGMobject("utils/fingerprint.svg")
+        finger_lines.set_color(CHART_ORANGE)
+        finger_lines.scale_to_fit_height(0.9)
+            
+        # Noise dots representing background noise (distributed in the corners/margins)
+        noise_dots = VGroup()
+        np.random.seed(42)
+        for _ in range(16):
+            while True:
+                rx = np.random.uniform(-0.8, 0.8)
+                ry = np.random.uniform(-0.8, 0.8)
+                if (rx/0.55)**2 + (ry/0.7)**2 > 1.05:
+                    dot = Dot([rx, ry, 0], color=TEXT_DIM, radius=0.035).set_opacity(0.6)
+                    noise_dots.add(dot)
+                    break
+                    
+        # Red 'X' crosses to mark discarded noise dots
+        crosses = VGroup()
+        for dot in noise_dots:
+            pos = dot.get_center()
+            cross = VGroup(
+                Line(pos + np.array([-0.04, -0.04, 0]), pos + np.array([0.04, 0.04, 0]), color=RED, stroke_width=1.5),
+                Line(pos + np.array([-0.04, 0.04, 0]), pos + np.array([0.04, -0.04, 0]), color=RED, stroke_width=1.5)
+            )
+            crosses.add(cross)
 
-        # Các dấu chấm nhiễu nền xung quanh
-        noise_dots = VGroup(*[
-            Dot(fg_area.get_center() + np.array([np.cos(a) * r, np.sin(a) * r, 0]), color=DELTA_COLOR, radius=0.04).set_opacity(0.4)
-            for a, r in zip(np.linspace(0, 2*PI, 10), [1.0, 1.1, 1.0, 1.2, 1.1, 1.3, 1.0, 1.1, 1.2, 1.05])
-        ])
+        # Position elements relative to raw_img_box center
+        finger_lines.move_to(raw_img_box.get_center())
+        fg_boundary.move_to(raw_img_box.get_center())
+        noise_dots.shift(raw_img_box.get_center())
+        crosses.shift(raw_img_box.get_center())
+        
+        fg_lbl = self.ct("Vùng vân tay (Foreground)", font_size=9, color=CHART_ORANGE).next_to(raw_img_box, DOWN, buff=0.1)
+        bg_lbl = self.ct("Vùng nền (Background)", font_size=9, color=TEXT_DIM).next_to(raw_img_box, UP, buff=0.1)
+        
+        seg_vis = VGroup(raw_img_box, finger_lines, noise_dots, fg_boundary, fg_lbl, bg_lbl)
+        seg_vis.scale(0.88).move_to(seg_box.get_center() + DOWN * 0.1)
+        crosses.scale(0.88).move_to(seg_vis[2].get_center())
 
-        fg_lbl = self.ct("Foreground (Vân Tay)", font_size=10, color=CHART_ORANGE).next_to(fg_area, DOWN, buff=0.1)
-        bg_lbl = self.ct("Background (Nền Nhiễu)", font_size=10, color=TEXT_DIM).next_to(bg_area, UP, buff=0.1)
-
-        seg_vis = VGroup(bg_area, fg_area, finger_lines, noise_dots, fg_lbl, bg_lbl).scale(0.85).shift(DOWN * 0.25)
-        seg_content = VGroup(seg_title, seg_vis)
-        seg_content.move_to(seg_box.get_center())
-        seg_group = VGroup(seg_box, seg_content).shift(LEFT * 3.3 + DOWN * 0.25)
+        seg_group = VGroup(seg_box, seg_title, seg_vis, seg_desc, crosses).shift(LEFT * 3.3 + DOWN * 0.25)
 
         # Phải: Poincaré Index Card
         poincare_box = create_rounded_box(width=5.0, height=3.5, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_BLUE, stroke_width=1.5)
@@ -184,24 +216,48 @@ class Scene04Extraction(Scene):
 
         # Trực quan hóa Segmentation trước
         self.play(FadeIn(seg_box), FadeIn(seg_title), run_time=0.8) # Total 1.4s
-        self.play(FadeIn(bg_area), FadeIn(bg_lbl), FadeIn(noise_dots), run_time=0.8) # Total 2.2s
         
-        # Phân tách vùng active: làm mờ nền nhiễu và làm sáng vùng Foreground
+        # Show raw image with noise
         self.play(
-            FadeIn(fg_area), FadeIn(finger_lines), FadeIn(fg_lbl),
-            noise_dots.animate.set_opacity(0.1),
-            run_time=1.2
-        ) # Total 3.4s
-        self.wait(1.5) # Total 4.9s
+            FadeIn(raw_img_box),
+            FadeIn(finger_lines),
+            FadeIn(noise_dots),
+            FadeIn(bg_lbl),
+            run_time=0.8
+        ) # Total 2.2s
+        
+        # Segmentation separation animation:
+        # 1. Draw boundary and show foreground label
+        self.play(
+            Create(fg_boundary),
+            FadeIn(fg_lbl, shift=UP * 0.12),
+            run_time=1.0
+        ) # Total 3.2s
+        
+        # 2. Show red crosses over the noise dots to indicate rejection
+        self.play(
+            FadeIn(crosses, scale=0.5),
+            run_time=0.6
+        ) # Total 3.8s
+        
+        # 3. Discard noise (fade out dots and crosses, dark mask/dim raw box, show description)
+        self.play(
+            FadeOut(noise_dots),
+            FadeOut(crosses),
+            raw_img_box.animate.set_color(TEXT_DIM).set_opacity(0.4),
+            FadeIn(seg_desc, shift=UP * 0.12),
+            run_time=1.0
+        ) # Total 4.8s
+        self.wait(1.5) # Total 6.3s
 
         # Xuất hiện Poincaré Card
-        self.play(FadeIn(poincare_box), FadeIn(poincare_title), run_time=0.8) # Total 5.7s
-        self.play(Write(formula), run_time=1.0) # Total 6.7s
-        self.play(FadeIn(results, shift=UP * 0.15), run_time=1.2) # Total 7.9s
+        self.play(FadeIn(poincare_box), FadeIn(poincare_title), run_time=0.8) # Total 7.1s
+        self.play(Write(formula), run_time=1.0) # Total 8.1s
+        self.play(FadeIn(results, shift=UP * 0.15), run_time=1.2) # Total 9.3s
 
         # --- CHẠY HOẠT ẢNH TÍCH PHÂN ĐƯỜNG POINCARÉ ---
         # Tạm thời dọn dẹp các công thức ở thẻ phải để biểu diễn tích phân
-        self.play(FadeOut(formula), FadeOut(results), run_time=0.8) # Total 8.7s
+        self.play(FadeOut(formula), FadeOut(results), run_time=0.8) # Total 10.1s
 
         pc_center = poincare_box.get_center() + DOWN * 0.3
         cand_dot = Dot(pc_center, color=CORE_POINT, radius=0.09)
@@ -236,7 +292,6 @@ class Scene04Extraction(Scene):
         ) # Total 9.7s
 
         # Chạy tích phân: Con trỏ di chuyển trên đường cong, vector hướng tích lũy góc xoay
-        # Góc xoay tích lũy chạy từ 0 đến +180 độ
         counter_val = ValueTracker(0)
         counter_lbl = self.ct("Tích lũy: 0°", font_size=11, color=PRIMARY, weight=BOLD).next_to(circle_c, DOWN, buff=0.1)
 
@@ -256,7 +311,7 @@ class Scene04Extraction(Scene):
         ) # Total 12.7s
         
         counter_lbl.remove_updater(update_cnt)
-        res_lbl = self.ct("P(C) = +180° (Loop Core Detected)", font_size=12, color=MATCH_COLOR, weight=BOLD).next_to(circle_c, DOWN, buff=0.1)
+        res_lbl = self.ct("P(C) = +180° (Phát hiện Điểm lõi)", font_size=12, color=MATCH_COLOR, weight=BOLD).next_to(circle_c, DOWN, buff=0.15)
         
         self.play(
             FadeOut(counter_lbl),
@@ -264,7 +319,6 @@ class Scene04Extraction(Scene):
             Indicate(cand_dot, color=MATCH_COLOR, scale_factor=2.0),
             run_time=1.0
         ) # Total 13.7s
-
         # Target = 17.59s. Play = 13.7s. Need 17.59s - 13.7s - 1.0s (FadeOut) = 2.89s
         self.wait(2.89)
         self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
@@ -278,9 +332,9 @@ class Scene04Extraction(Scene):
 
         stages = [
             ("1. Ảnh Xám", TEXT_DIM, self._create_grayscale_sim()),
-            ("2. Tăng Cường (Gabor)", RIDGE_COLOR, self._create_enhanced_sim()),
-            ("3. Nhị Phân", CHART_BLUE, self._create_binary_sim()),
-            ("4. Làm Mỏng (Xương)", CORE_POINT, self._create_thinned_sim()),
+            ("2. Tăng cường", RIDGE_COLOR, self._create_enhanced_sim()),
+            ("3. Nhị phân hóa", CHART_BLUE, self._create_binary_sim()),
+            ("4. Làm mảnh", CORE_POINT, self._create_thinned_sim()),
         ]
 
         stage_groups = VGroup()
@@ -305,7 +359,7 @@ class Scene04Extraction(Scene):
         filter_desc = self.ct(
             "Bộ lọc ngữ cảnh Gabor hoạt động như một bộ lọc thông dải cục bộ giúp làm rõ đường vân",
             font_size=15, color=PRIMARY, weight=BOLD
-        ).to_edge(DOWN, buff=0.5)
+        ).to_edge(DOWN, buff=0.85)
 
         # Đường laser quét reveal
         scan_group = Line(UP * 2.2, DOWN * 2.2, color=PRIMARY, stroke_width=4.0).move_to(LEFT * 6.8)
@@ -350,7 +404,7 @@ class Scene04Extraction(Scene):
         grid_lbl = self.ct("Cửa sổ quét 3x3 pixel", font_size=13, color=TEXT_DIM).next_to(grid, DOWN, buff=0.2)
 
         p_center = Dot(grid[4].get_center(), color=PRIMARY, radius=0.1)
-        p_label = MathTex(r"P", font_size=18, color=PRIMARY).next_to(p_center, UR, buff=0.03)
+        p_label = MathTex(r"P", font_size=18, color=PRIMARY).next_to(p_center, UR, buff=0.02)
 
         # Định vị các điểm lân cận P1 đến P8 (theo chiều kim đồng hồ)
         # Các chỉ số ô vuông trong grid 3x3:
@@ -365,8 +419,8 @@ class Scene04Extraction(Scene):
             neighbors.add(dot)
 
         cases = VGroup(
-            self.ct("CN(P) = 1  →  Điểm kết thúc (Termination)", font_size=14, color=MINUTIA_TERM, weight=BOLD),
-            self.ct("CN(P) = 3  →  Điểm phân nhánh (Bifurcation)", font_size=14, color=MINUTIA_BIFUR, weight=BOLD),
+            self.ct("CN(P) = 1  →  Điểm kết thúc", font_size=14, color=MINUTIA_TERM, weight=BOLD),
+            self.ct("CN(P) = 3  →  Điểm phân nhánh", font_size=14, color=MINUTIA_BIFUR, weight=BOLD),
             self.ct("CN(P) = 2  →  Đường vân liên tục bình thường", font_size=13, color=TEXT_DIM)
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).shift(LEFT * 3.3 + DOWN * 1.1)
 
