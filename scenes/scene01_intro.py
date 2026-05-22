@@ -269,15 +269,17 @@ class Scene01Intro(Scene):
 
         cards.arrange(RIGHT, buff=0.5).shift(DOWN * 0.3)
 
-        # Show sequentially: Total target = 11.33s before next section
+        # Show sequentially: Total target = 11.92s before next section
+        self.wait(2.2)
         self.play(FadeIn(cards[0], shift=UP * 0.5, scale=0.9), run_time=0.6)
-        self.wait(2.5)
+        self.wait(1.56)
         self.play(FadeIn(cards[1], shift=UP * 0.5, scale=0.9), run_time=0.6)
-        self.wait(2.5)
+        self.wait(3.07)
         self.play(FadeIn(cards[2], shift=UP * 0.5, scale=0.9), run_time=0.6)
         
-        # 0.6 + 0.6 + 2.5 + 0.6 + 2.5 + 0.6 = 7.4s. Remaining wait: 11.92s - 7.4s - 0.8s (FadeOut) = 3.72s.
-        self.wait(3.72)
+        # 0.6 (section in) + 2.2 (wait) + 0.6 (card 0) + 1.56 (wait) + 0.6 (card 1) + 3.07 (wait) + 0.6 (card 2) = 9.23s.
+        # Remaining wait before fadeout: 11.92s - 9.23s - 0.8s (FadeOut) = 1.89s.
+        self.wait(1.89)
         self.play(FadeOut(VGroup(section, cards)), run_time=0.8)
 
     def fingerprint_patterns(self):
@@ -317,17 +319,18 @@ class Scene01Intro(Scene):
 
         cards.arrange(RIGHT, buff=0.6).shift(DOWN * 0.4)
 
+        self.wait(1.26)
         # Show cards
         self.play(FadeIn(cards[0], shift=UP * 0.5), run_time=0.4)
-        self.wait(0.5)
+        self.wait(1.68)
         self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.4)
-        self.wait(0.5)
+        self.wait(0.43)
         self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.4)
 
         # Target = 6.64s.
-        # Elapsed so far: 0.4 (section) + 0.4 (card0) + 0.5 (wait) + 0.4 (card1) + 0.5 (wait) + 0.4 (card2) = 2.6s.
-        # Remaining wait before fadeout: 6.64 - 2.6 - 0.8 (FadeOut) = 3.24s.
-        self.wait(3.24)
+        # Elapsed so far: 0.4 (section) + 1.26 (wait) + 0.4 (card0) + 1.68 (wait) + 0.4 (card1) + 0.43 (wait) + 0.4 (card2) = 4.97s.
+        # Remaining wait before fadeout: 6.64 - 4.97 - 0.8 (FadeOut) = 0.87s.
+        self.wait(0.87)
         self.play(FadeOut(VGroup(section, cards)), run_time=0.8)
 
     def history_timeline(self):
@@ -407,7 +410,7 @@ class Scene01Intro(Scene):
             FadeIn(fbi_panel, shift=UP * 0.3),
             run_time=0.5
         )
-        self.wait(2.0)
+        self.wait(1.38)
 
         self.play(
             FadeOut(forensic_title, shift=UP * 0.2),
@@ -469,7 +472,13 @@ class Scene01Intro(Scene):
         )
 
         # Target duration: 24.06s.
-        # Accumulated so far: 21.72s.
-        # Wait remaining: 24.06s - 21.72s - 1.0s (FadeOut) = 1.34s.
-        self.wait(1.34)
+        # Accumulated so far: 1.4 (line + section) + 17.32 (timeline events) + 0.5 (timeline out)
+        #                     + 0.5 (fbi in) + 1.38 (fbi wait) + 0.5 (fbi out)
+        #                     + 0.3 (civil in) + 0.7 (apps in) = 22.6s.
+        # Wait remaining: 24.06s + 17.72s (timeline part) = 41.78s total section?
+        # Wait! Let's check: total section duration is 24.06s.
+        # Accumulated for forensic + civil = 0.5 (timeline out) + 0.5 (fbi in) + 1.38 (fbi wait) + 0.5 (fbi out) + 0.3 (civil in) + 0.7 (apps in) = 3.88s.
+        # Total duration for Segment 13 is 8.24s.
+        # Wait remaining for Segment 13: 8.24s - 3.88s - 1.0s (FadeOut) = 3.36s.
+        self.wait(3.36)
         self.play(FadeOut(VGroup(section, civil_title, civil_apps)), run_time=1.0)

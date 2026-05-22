@@ -283,6 +283,8 @@ class Scene02Sensing(Scene):
 
         # --- CAPACITIVE SENSOR ZOOM-IN POP-UP TRANSITION ---
         # Shift the two cards out of the center
+        cards[0].save_state()
+        cards[1].save_state()
         self.play(
             cards[0].animate.scale(0.6).to_edge(LEFT, buff=0.4).shift(UP * 0.8).set_opacity(0.4),
             cards[1].animate.scale(0.6).to_edge(RIGHT, buff=0.4).shift(UP * 0.8).set_opacity(0.4),
@@ -291,76 +293,138 @@ class Scene02Sensing(Scene):
 
         # Build detailed capacitive schematic
         popup_box = create_rounded_box(width=8.0, height=4.2, fill_color=SECONDARY, fill_opacity=0.15, stroke_color=CHART_BLUE, stroke_width=2).shift(DOWN * 0.4)
-        popup_title = self.ct("Cơ chế Cảm biến Điện dung (Capacitive)", font_size=16, color=CHART_BLUE, weight=BOLD).next_to(popup_box.get_top(), DOWN, buff=0.2)
+        popup_title = self.ct("Cơ chế Cảm biến Điện dung", font_size=16, color=CHART_BLUE, weight=BOLD).next_to(popup_box.get_top(), DOWN, buff=0.2)
         
-        silicon = Line(LEFT * 3.0, RIGHT * 3.0, color="#555555", stroke_width=4).shift(popup_box.get_center() + DOWN * 0.8)
-        silicon_lbl = self.ct("Bề mặt Silicon", font_size=11, color=TEXT_DIM).next_to(silicon, DOWN, buff=0.1)
+        # Center of schematic elements is same as popup_box center
+        center = popup_box.get_center()
+
+        # Silicon substrate
+        substrate = RoundedRectangle(
+            width=6.6, height=0.6,
+            fill_color="#2c3e50", fill_opacity=0.8,
+            stroke_color=GRAY, stroke_width=1.5
+        ).move_to(center + DOWN * 0.9)
+        substrate_lbl = self.ct("Đế Silicon", font_size=11, color=TEXT_DIM).next_to(substrate, DOWN, buff=0.15)
         
-        e1 = Square(side_length=0.4, color=PRIMARY, fill_color=PRIMARY, fill_opacity=0.3, stroke_width=1).move_to(silicon.get_center() + LEFT * 1.5 + UP * 0.2)
-        e2 = Square(side_length=0.4, color=PRIMARY, fill_color=PRIMARY, fill_opacity=0.3, stroke_width=1).move_to(silicon.get_center() + RIGHT * 1.5 + UP * 0.2)
-        e1_lbl = self.ct("Điện cực 1 (Ridge)", font_size=9, color=PRIMARY).next_to(e1, DOWN, buff=0.05)
-        e2_lbl = self.ct("Điện cực 2 (Valley)", font_size=9, color=PRIMARY).next_to(e2, DOWN, buff=0.05)
+        # Embedded sensing electrodes
+        e1 = Rectangle(width=1.2, height=0.2, fill_color=PRIMARY, fill_opacity=0.6, stroke_color=PRIMARY, stroke_width=1.5).move_to(center + LEFT * 1.8 + DOWN * 0.7)
+        e2 = Rectangle(width=1.2, height=0.2, fill_color=PRIMARY, fill_opacity=0.6, stroke_color=PRIMARY, stroke_width=1.5).move_to(center + RIGHT * 1.8 + DOWN * 0.7)
+        e1_lbl = self.ct("Điện cực", font_size=11, color=TEXT_DIM).move_to(center + LEFT * 1.8 + DOWN * 1.0)
+        e2_lbl = self.ct("Điện cực", font_size=11, color=TEXT_DIM).move_to(center + RIGHT * 1.8 + DOWN * 1.0)
         
+        # Skin profile (ridged/valley pattern)
         skin_path = VMobject()
         skin_path.set_points_smoothly([
-            silicon.get_center() + LEFT * 2.8 + UP * 0.3,
-            silicon.get_center() + LEFT * 1.5 + UP * 0.21,  # Ridge touches
-            silicon.get_center() + ORIGIN + UP * 1.3,
-            silicon.get_center() + RIGHT * 1.5 + UP * 1.0, # Valley floats above
-            silicon.get_center() + RIGHT * 2.8 + UP * 1.1,
+            center + LEFT * 3.0 + DOWN * 0.2,
+            center + LEFT * 1.8 + DOWN * 0.55,  # Ridge (touches sensing layer)
+            center + ORIGIN + UP * 0.5,
+            center + RIGHT * 1.8 + UP * 0.6,    # Valley (floating above)
+            center + RIGHT * 3.0 + UP * 0.7,
         ])
-        skin_path.set_stroke(color="#d4a574", width=3)
-        skin_lbl = self.ct("Lớp da ngón tay", font_size=11, color="#d4a574").next_to(skin_path.get_top(), UP, buff=0.05)
+        skin_path.set_stroke(color="#d4a574", width=4)
         
-        c1_lbl = MathTex(r"C_{\text{High}}", font_size=20, color=MATCH_COLOR).next_to(e1, UP, buff=0.1)
-        c2_lbl = MathTex(r"C_{\text{Low}}", font_size=20, color=MISMATCH_COLOR).next_to(e2, UP, buff=0.1)
+        # Labels for ridge/valley structures
+        ridge_lbl = self.ct("Đường vân", font_size=12, color=RIDGE_COLOR, weight=BOLD).move_to(center + LEFT * 1.8 + UP * 0.25)
+        valley_lbl = self.ct("Rãnh", font_size=12, color=TEXT_DIM, weight=BOLD).move_to(center + RIGHT * 1.8 + UP * 1.05)
         
-        # Charges
-        charge_plus1 = self.ct("+", font_size=12, color=MATCH_COLOR).move_to(e1.get_center())
-        charge_plus2 = self.ct("+", font_size=8, color=MISMATCH_COLOR).move_to(e2.get_center())
-        charge_minus1 = self.ct("-", font_size=12, color=MATCH_COLOR).move_to(silicon.get_center() + LEFT * 1.5 + UP * 0.25)
-        charge_minus2 = self.ct("-", font_size=8, color=MISMATCH_COLOR).move_to(silicon.get_center() + RIGHT * 1.5 + UP * 0.9)
+        # Capacitance text
+        c1_lbl = MathTex(r"C_{\text{High}}", font_size=24, color=MATCH_COLOR).move_to(center + LEFT * 1.8 + DOWN * 0.3)
+        c2_lbl = MathTex(r"C_{\text{Low}}", font_size=24, color=MISMATCH_COLOR).move_to(center + RIGHT * 1.8 + UP * 0.15)
         
-        charges = VGroup(charge_plus1, charge_plus2, charge_minus1, charge_minus2)
-        capacitive_popup = VGroup(popup_box, popup_title, silicon, silicon_lbl, e1, e2, e1_lbl, e2_lbl, skin_path, skin_lbl, c1_lbl, c2_lbl, charges)
+        # Electric field lines between electrodes and skin
+        field_lines = VGroup()
+        # Strong electric field at ridge (high capacitance)
+        for dx in [-0.4, -0.2, 0.0, 0.2, 0.4]:
+            line = DashedLine(
+                start=center + LEFT * 1.8 + dx * RIGHT + DOWN * 0.6,
+                end=center + LEFT * 1.8 + dx * RIGHT + DOWN * 0.55,
+                color=MATCH_COLOR, stroke_width=2, dashed_ratio=0.5
+            )
+            field_lines.add(line)
+            
+        # Weak electric field at valley (low capacitance)
+        for dx in [-0.3, 0.0, 0.3]:
+            line = DashedLine(
+                start=center + RIGHT * 1.8 + dx * RIGHT + DOWN * 0.6,
+                end=center + RIGHT * 1.8 + dx * RIGHT + UP * 0.6,
+                color=MISMATCH_COLOR, stroke_width=1.5, dashed_ratio=0.5
+            )
+            field_lines.add(line)
+            
+        # Charges (+ and -) showing charge density distribution
+        charges = VGroup()
+        # Positive charges inside electrodes
+        for dx in [-0.3, 0.0, 0.3]:
+            charges.add(self.ct("+", font_size=14, color=TEXT_BRIGHT, weight=BOLD).move_to(center + LEFT * 1.8 + dx * RIGHT + DOWN * 0.7))
+        for dx in [-0.2, 0.2]:
+            charges.add(self.ct("+", font_size=10, color=TEXT_DIM).move_to(center + RIGHT * 1.8 + dx * RIGHT + DOWN * 0.7))
+            
+        # Negative charges along skin
+        for dx in [-0.4, -0.2, 0.0, 0.2, 0.4]:
+            charges.add(self.ct("-", font_size=14, color=MATCH_COLOR, weight=BOLD).move_to(center + LEFT * 1.8 + dx * RIGHT + DOWN * 0.45))
+        for dx in [-0.3, 0.3]:
+            charges.add(self.ct("-", font_size=10, color=MISMATCH_COLOR).move_to(center + RIGHT * 1.8 + dx * RIGHT + UP * 0.85))
+
+        capacitive_popup = VGroup(
+            popup_box, popup_title, substrate, substrate_lbl, 
+            e1, e2, e1_lbl, e2_lbl, skin_path, ridge_lbl, valley_lbl, 
+            c1_lbl, c2_lbl, field_lines, charges
+        )
 
         self.play(FadeIn(popup_box), FadeIn(popup_title), run_time=0.6) # Total 7.7s
-        self.play(Create(silicon), FadeIn(silicon_lbl), Create(e1), Create(e2), FadeIn(e1_lbl), FadeIn(e2_lbl), run_time=0.9) # Total 8.6s
-        self.play(Create(skin_path), FadeIn(skin_lbl), run_time=0.8) # Total 9.4s
-        self.play(FadeIn(c1_lbl), FadeIn(c2_lbl), FadeIn(charges), run_time=0.7) # Total 10.1s
-        self.play(Indicate(c1_lbl, color=MATCH_COLOR, scale_factor=1.3), run_time=0.8) # Total 10.9s
-        self.wait(1.2) # Total 12.1s
+        self.play(Create(substrate), FadeIn(substrate_lbl), Create(e1), Create(e2), FadeIn(e1_lbl), FadeIn(e2_lbl), run_time=0.9) # Total 8.6s
+        self.play(Create(skin_path), FadeIn(ridge_lbl), FadeIn(valley_lbl), run_time=0.8) # Total 9.4s
+        self.play(FadeIn(c1_lbl), FadeIn(c2_lbl), Create(field_lines), FadeIn(charges), run_time=0.8) # Total 10.2s
+        self.play(Indicate(c1_lbl, color=MATCH_COLOR, scale_factor=1.3), run_time=0.8) # Total 11.0s
+        self.wait(1.2) # Total 12.2s
 
         # Fade out pop-up and restore layout
         self.play(
             FadeOut(capacitive_popup),
-            cards[0].animate.scale(1/0.6).move_to(cards[0].get_center()).set_opacity(1.0),
-            cards[1].animate.scale(1/0.6).move_to(cards[1].get_center()).set_opacity(1.0),
+            Restore(cards[0]),
+            Restore(cards[1]),
             run_time=1.0
-        ) # Total 13.1s
+        ) # Total 13.2s
 
-        # 3. Fade in Ultrasound card (13.1s - 13.9s)
-        self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.8) # Total 13.9s
+        # 3. Fade in Ultrasound card (13.2s - 14.0s)
+        # Dim cards 0 and 1 to highlight card 2
+        self.play(
+            FadeIn(cards[2], shift=UP * 0.5),
+            cards[0].animate.set_opacity(0.3),
+            cards[1].animate.set_opacity(0.3),
+            run_time=0.8
+        ) # Total 14.0s
 
-        # Animate ultrasound waves inside card 3
-        wave_center = cards[2].get_center() + DOWN * 0.8
+        # Animate ultrasound waves inside card 3 (Pulse-echo ripple)
+        wave_center = cards[2].get_center() + DOWN * 1.0
         waves_up = VGroup()
         for i in range(3):
-            arc = Arc(radius=0.25 + i * 0.25, start_angle=PI/6, angle=2*PI/3, color=CHART_BLUE, stroke_width=2.0).move_to(wave_center, aligned_edge=DOWN)
+            arc = Arc(radius=0.15 + i * 0.15, start_angle=PI/6, angle=2*PI/3, color=CHART_BLUE, stroke_width=1.5).move_to(wave_center, aligned_edge=DOWN)
             waves_up.add(arc)
             
         waves_down = VGroup()
         for i in range(3):
-            arc = Arc(radius=0.75 - i * 0.25, start_angle=PI/6, angle=2*PI/3, color=CHART_ORANGE, stroke_width=1.5).move_to(wave_center, aligned_edge=DOWN)
+            arc = Arc(radius=0.45 - i * 0.15, start_angle=-5*PI/6, angle=2*PI/3, color=CHART_ORANGE, stroke_width=1.0).move_to(wave_center, aligned_edge=UP)
             d_arc = DashedVMobject(arc, num_dashes=6)
             waves_down.add(d_arc)
 
-        self.play(LaggedStart(*[Create(w) for w in waves_up], lag_ratio=0.25), run_time=1.2) # Total 15.1s
-        self.play(LaggedStart(*[Create(w) for w in waves_down], lag_ratio=0.25), run_time=1.2) # Total 16.3s
+        # Pulse animation: waves propagate up, hit finger, reflect down, and fade out
+        self.play(LaggedStart(*[Create(w) for w in waves_up], lag_ratio=0.2), run_time=1.0) # Total 15.0s
+        self.play(
+            LaggedStart(*[Create(w) for w in waves_down], lag_ratio=0.2), 
+            FadeOut(waves_up), 
+            run_time=1.0
+        ) # Total 16.0s
+        self.play(
+            FadeOut(waves_down), 
+            Restore(cards[0]),
+            Restore(cards[1]),
+            run_time=0.8
+        ) # Total 16.8s
 
-        # Target = 23.23s. FadeOut = 1.0s. Wait remaining: 23.23s - 16.3s - 1.0s = 5.93s.
-        self.wait(5.93)
-        self.play(FadeOut(VGroup(section, cards, waves_up, waves_down)), run_time=1.0)
+        # Target = 23.23s. FadeOut = 1.0s. Wait remaining: 23.23s - 16.8s - 1.0s = 5.43s.
+        self.wait(5.43)
+        self.play(FadeOut(VGroup(section, cards)), run_time=1.0)
         self.wait(0.8) # Silence gap
 
     def new_tech_and_challenges(self):
