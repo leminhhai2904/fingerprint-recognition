@@ -18,6 +18,7 @@ class Scene03Features(Scene):
     def construct(self):
         scene_setup(self)
         self.section_title()
+        self.ridge_valley_concept()
         self.singularities()
         self.minutiae_types()
         self.minutiae_representation()
@@ -37,78 +38,83 @@ class Scene03Features(Scene):
         return VGroup(title, underline)
 
     def section_title(self):
-        """Tiêu đề mục — Segment 1 = 11.23s."""
+        """Tiêu đề mục — Segment 1 = 3.30s."""
         num = self.ct("02", font_size=80, color=PRIMARY, weight=BOLD, font="Consolas")
         title = self.ct("Trích Xuất Đặc Trưng", font_size=42, color=TEXT_BRIGHT, weight=BOLD)
         subtitle = self.ct("Phân tích đặc tính toàn cục và cục bộ", font_size=20, color=TEXT_DIM)
-        group = VGroup(num, title, subtitle).arrange(DOWN, aligned_edge=LEFT, buff=0.3).shift(LEFT * 3.2)
+        group = VGroup(num, title, subtitle).arrange(DOWN, buff=0.3).move_to(ORIGIN)
 
-        # 1. Left side title group fades in (0.0s - 2.5s)
-        self.play(FadeIn(num, scale=1.5), run_time=0.5)
-        self.play(FadeIn(title, shift=UP * 0.3), run_time=1.0)
-        self.play(FadeIn(subtitle, shift=UP * 0.2), run_time=1.0)
-        self.wait(1.0) # Total 3.5s
+        self.play(FadeIn(num, scale=1.3), run_time=0.7)
+        self.play(FadeIn(title, shift=UP * 0.2), run_time=0.9)
+        self.play(FadeIn(subtitle, shift=UP * 0.15), run_time=0.9)
+        
+        # Segment 1 starts at 0.20s, Segment 2 starts at 3.30s (Gap = 3.10s spoken time, 3.30s elapsed)
+        # title_in (2.5s) + wait (0.2s) + FadeOut (0.6s) = 3.30s.
+        self.wait(0.2)
+        self.play(FadeOut(group), run_time=0.6)
 
-        # 2. Right side fingerprint slice appears (3.5s - 5.0s)
+    def ridge_valley_concept(self):
+        """Khái niệm Đường vân & Rãnh — Segment 2 & 3 = 8.18s."""
         # Background box to represent fingerprint paper/sensor print (light grey/white)
-        box = create_rounded_box(width=5.0, height=4.0, fill_color="#f5f5fa", fill_opacity=1.0, stroke_color=PRIMARY, stroke_width=2).shift(RIGHT * 3.2 + DOWN * 0.4)
+        box = create_rounded_box(width=5.5, height=4.4, fill_color="#f5f5fa", fill_opacity=1.0, stroke_color=PRIMARY, stroke_width=2.5).shift(DOWN * 0.2)
         
         # Ridges inside the box (dark lines)
-        ridge1 = Line(LEFT * 1.8 + UP * 1.0, RIGHT * 1.8 + UP * 1.0, color="#1a1a2e", stroke_width=4.5)
-        ridge2 = Line(LEFT * 1.8 + UP * 0.35, LEFT * 0.2 + UP * 0.35, color="#1a1a2e", stroke_width=4.5)
+        ridge1 = Line(LEFT * 2.0 + UP * 1.1, RIGHT * 2.0 + UP * 1.1, color="#1a1a2e", stroke_width=5.0)
+        ridge2 = Line(LEFT * 2.0 + UP * 0.38, LEFT * 0.2 + UP * 0.38, color="#1a1a2e", stroke_width=5.0)
         
         # Bifurcation line components
-        ridge3_main = Line(LEFT * 1.8 + DOWN * 0.3, LEFT * 0.3 + DOWN * 0.3, color="#1a1a2e", stroke_width=4.5)
-        ridge3_up = Line(LEFT * 0.3 + DOWN * 0.3, RIGHT * 1.8 + UP * 0.1, color="#1a1a2e", stroke_width=4.5)
-        ridge3_down = Line(LEFT * 0.3 + DOWN * 0.3, RIGHT * 1.8 + DOWN * 0.7, color="#1a1a2e", stroke_width=4.5)
+        ridge3_main = Line(LEFT * 2.0 + DOWN * 0.33, LEFT * 0.3 + DOWN * 0.33, color="#1a1a2e", stroke_width=5.0)
+        ridge3_up = Line(LEFT * 0.3 + DOWN * 0.33, RIGHT * 2.0 + UP * 0.11, color="#1a1a2e", stroke_width=5.0)
+        ridge3_down = Line(LEFT * 0.3 + DOWN * 0.33, RIGHT * 2.0 + DOWN * 0.77, color="#1a1a2e", stroke_width=5.0)
         
-        ridge4 = Line(LEFT * 1.8 + DOWN * 1.1, RIGHT * 1.8 + DOWN * 1.1, color="#1a1a2e", stroke_width=4.5)
+        ridge4 = Line(LEFT * 2.0 + DOWN * 1.21, RIGHT * 2.0 + DOWN * 1.21, color="#1a1a2e", stroke_width=5.0)
         
         ridges_group = VGroup(ridge1, ridge2, ridge3_main, ridge3_up, ridge3_down, ridge4).shift(box.get_center())
         
-        self.play(FadeIn(box), LaggedStart(*[Create(r) for r in ridges_group], lag_ratio=0.15), run_time=1.5)
-        # Total 5.0s
+        self.play(FadeIn(box), LaggedStart(*[Create(r) for r in ridges_group], lag_ratio=0.15), run_time=1.8)
 
-        # 3. Labeling Ridge and Valley (5.0s - 6.0s)
-        ridge_lbl = self.ct("Đường vân - Tối", font_size=13, color=TEXT_BRIGHT)
-        ridge_lbl.move_to(box.get_top() + UP * 0.45 + LEFT * 0.8)
-        ridge_arrow = Arrow(start=ridge_lbl.get_bottom() + RIGHT * 0.2, end=box.get_center() + UP * 1.0, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
+        # Labeling Ridge and Valley
+        ridge_lbl = self.ct("Đường vân - Tối", font_size=14, color=TEXT_BRIGHT)
+        ridge_lbl.move_to(box.get_top() + UP * 0.45 + LEFT * 0.9)
+        ridge_arrow = Arrow(start=ridge_lbl.get_bottom() + RIGHT * 0.2, end=ridge1.get_center() + UP * 0.1, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
         
-        valley_lbl = self.ct("Rãnh - Sáng", font_size=13, color=TEXT_BRIGHT)
-        valley_lbl.move_to(box.get_bottom() + DOWN * 0.45 + RIGHT * 0.8)
-        valley_arrow = Arrow(start=valley_lbl.get_top() - RIGHT * 0.2, end=box.get_center() + LEFT * 0.6 + DOWN * 0.65, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
+        valley_lbl = self.ct("Rãnh - Sáng", font_size=14, color=TEXT_BRIGHT)
+        valley_lbl.move_to(box.get_bottom() + DOWN * 0.45 + RIGHT * 0.9)
+        valley_arrow = Arrow(start=valley_lbl.get_top() - RIGHT * 0.2, end=box.get_center() + LEFT * 0.6 + DOWN * 0.8, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
         
-        self.play(Create(ridge_arrow), FadeIn(ridge_lbl), Create(valley_arrow), FadeIn(valley_lbl), run_time=1.0)
-        # Total 6.0s
-        self.wait(0.5) # Total 6.5s
+        self.play(Create(ridge_arrow), FadeIn(ridge_lbl), Create(valley_arrow), FadeIn(valley_lbl), run_time=1.2)
+        
+        # Segment 2 starts at 3.30s, Segment 3 starts at 7.16s (Gap = 3.86s).
+        # box_in (1.8s) + labels_in (1.2s) + wait (0.86s) = 3.86s.
+        self.wait(0.86)
 
-        # 4. Highlight Termination & Bifurcation on the print (6.5s - 8.0s)
-        term_dot = Dot(ridge2.get_end(), color=MINUTIA_TERM, radius=0.08)
-        bifur_dot = Dot(ridge3_main.get_end(), color=MINUTIA_BIFUR, radius=0.08)
+        # Highlight Termination & Bifurcation on the print
+        term_dot = Dot(ridge2.get_end(), color=MINUTIA_TERM, radius=0.09)
+        bifur_dot = Dot(ridge3_main.get_end(), color=MINUTIA_BIFUR, radius=0.09)
         
-        self.play(FadeIn(term_dot, scale=1.5), FadeIn(bifur_dot, scale=1.5), run_time=0.5)
+        self.play(FadeIn(term_dot, scale=1.5), FadeIn(bifur_dot, scale=1.5), run_time=0.8)
         self.play(
             Indicate(term_dot, color=MINUTIA_TERM, scale_factor=2.0),
             Indicate(bifur_dot, color=MINUTIA_BIFUR, scale_factor=2.0),
-            run_time=1.0
+            run_time=1.2
         )
-        # Total 8.0s
 
-        # Target Segment 1 = 11.23s. FadeOut = 1.0s. Need to wait: 11.23 - 8.0 - 1.0 = 2.23s.
-        self.wait(2.23)
-        self.play(FadeOut(VGroup(group, box, ridges_group, ridge_lbl, ridge_arrow, valley_lbl, valley_arrow, term_dot, bifur_dot)), run_time=1.0)
-        self.wait(0.8) # Silence gap
+        # Segment 3 starts at 7.16s, Segment 4 starts at 11.48s (Gap = 4.32s).
+        # dots_in (0.8s) + indicate (1.2s) + wait (0.72s) + FadeOut (0.8s) = 3.52s.
+        # Silence gap (0.8s) = 4.32s.
+        self.wait(0.72)
+        self.play(FadeOut(VGroup(box, ridges_group, ridge_lbl, ridge_arrow, valley_lbl, valley_arrow, term_dot, bifur_dot)), run_time=0.8)
+        self.wait(0.8)
 
     def singularities(self):
-        """Singularities (Loop, Delta, Whorl) — Segment 2 = 16.54s."""
+        """Singularities (Loop, Delta, Whorl) — Segment 4 & 5 = 17.68s."""
         section = self.get_section_hdr("Điểm kỳ dị")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         intro = self.ct("Mức toàn cục: Mật độ đường vân tạo ra ba cấu trúc kỳ dị chính", font_size=16, color=TEXT_COLOR)
         intro.next_to(section, DOWN, buff=0.3)
-        self.play(FadeIn(intro), run_time=0.6)
-        # Total 1.2s
+        self.play(FadeIn(intro), run_time=0.8)
 
         # ── 1. Loop (Móc) ──
         loop_box = create_rounded_box(width=3.4, height=3.4, fill_color=CHART_BLUE, fill_opacity=0.08, stroke_color=CHART_BLUE, stroke_width=1.5)
@@ -142,13 +148,12 @@ class Scene03Features(Scene):
         delta_lbl_name.next_to(delta_box, DOWN, buff=0.2)
         whorl_lbl.next_to(whorl_box, DOWN, buff=0.2)
 
-        # Fade in cards sequentially (1.2s - 3.6s)
-        self.play(FadeIn(loop_group, shift=UP * 0.3, scale=0.9), run_time=0.8)
-        self.play(FadeIn(delta_group, shift=UP * 0.3, scale=0.9), run_time=0.8)
-        self.play(FadeIn(whorl_group, shift=UP * 0.3, scale=0.9), run_time=0.8)
-        # Total 3.6s
+        # Fade in cards sequentially (1.6s - 4.6s)
+        self.play(FadeIn(loop_group, shift=UP * 0.3, scale=0.9), run_time=1.0)
+        self.play(FadeIn(delta_group, shift=UP * 0.3, scale=0.9), run_time=1.0)
+        self.play(FadeIn(whorl_group, shift=UP * 0.3, scale=0.9), run_time=1.0)
 
-        # Pulse waves on core & delta dots (3.6s - 4.6s)
+        # Pulse waves on core & delta dots
         pulse_anims = []
         pulses = []
         for dot, color in [(core_dot, CORE_POINT), (delta_dot, DELTA_COLOR), (whorl_dot, CORE_POINT)]:
@@ -163,14 +168,15 @@ class Scene03Features(Scene):
                     lag_ratio=0.3
                 )
             )
-        self.play(*pulse_anims, run_time=1.0)
+        self.play(*pulse_anims, run_time=1.2)
         self.remove(*pulses)
-        # Total 4.6s
+        
+        # Segment 4 starts at 11.48s, Segment 5 starts at 21.78s (Gap = 10.30s).
+        # Section (0.8s) + intro (0.8s) + cards (3.0s) + pulses (1.2s) + wait (4.50s) = 10.30s.
+        self.wait(4.50)
 
-        # Transition to normalization demo (4.6s - 5.4s)
-        self.play(FadeOut(VGroup(intro, all_singular)), run_time=0.7)
-        self.wait(0.1)
-        # Total 5.4s
+        # Transition to normalization demo (Segment 5 starts at 21.78s)
+        self.play(FadeOut(VGroup(intro, all_singular)), run_time=0.6)
 
         # Create elements for normalization demo
         demo_title = self.ct("Chuẩn hóa vân tay qua điểm Core", font_size=20, color=TEXT_BRIGHT, weight=BOLD).shift(LEFT * 3.5 + UP * 1.2)
@@ -198,42 +204,47 @@ class Scene03Features(Scene):
         fp_group.shift(axes_center + RIGHT * 1.0 + UP * 0.8)
         fp_group.rotate(35 * DEGREES, about_point=core_dot.get_center())
         
-        # Normalization Animations (5.4s - 11.1s)
-        self.play(FadeIn(demo_title), FadeIn(demo_desc), run_time=0.6) # Total 6.0s
-        self.play(FadeIn(fp_group), run_time=0.8)                       # Total 6.8s
-        self.play(Create(dashed_x), Create(dashed_y), run_time=0.8)     # Total 7.6s
-        self.wait(0.5)                                                  # Total 8.1s
+        # Normalization Animations
+        self.play(FadeIn(demo_title), FadeIn(demo_desc), run_time=0.8)
+        self.play(FadeIn(fp_group), run_time=0.8)
+        self.play(Create(dashed_x), Create(dashed_y), run_time=0.8)
+        self.wait(0.1)
         
         # Animate fingerprint translating and rotating back to axes_center
         self.play(
             fp_group.animate.shift(axes_center - core_dot.get_center()).rotate(-35 * DEGREES, about_point=axes_center),
-            run_time=1.8,
+            run_time=2.0,
             rate_func=smooth
-        ) # Total 9.9s
+        )
         
         success_lbl = self.ct("Chuẩn hóa hoàn tất!", font_size=15, color=MATCH_COLOR, weight=BOLD).next_to(demo_desc, DOWN, buff=0.5, aligned_edge=LEFT)
         self.play(
             FadeIn(success_lbl, shift=UP * 0.1),
             core_dot.animate.scale(2.0),
-            run_time=0.8
+            run_time=0.6
         )
-        self.play(core_dot.animate.scale(0.5), run_time=0.4) # Total 11.1s
+        self.play(core_dot.animate.scale(0.5), run_time=0.4)
         
-        # Target Segment 2 = 16.54s. FadeOut = 0.8s. Need wait: 16.54 - 11.1 - 0.8 = 4.64s.
-        self.wait(4.64)
+        # Segment 5 starts at 21.78s, Segment 6 starts at 29.16s (Gap = 7.38s).
+        # FadeOut_cards (0.6s) + title_in (0.8s) + fp_in (0.8s) + axes_in (0.8s) + wait (0.1s)
+        # + rot (2.0s) + success (0.6s) + scale (0.4s) + wait (0.48s) + FadeOut (0.8s) = 7.38s.
+        self.wait(0.48)
         self.play(FadeOut(VGroup(section, demo_title, demo_desc, success_lbl, fp_group, dashed_x, dashed_y)), run_time=0.8)
         self.wait(0.8)
 
     def minutiae_types(self):
-        """Minutiae Termination & Bifurcation — Segment 3 = 14.35s."""
+        """Minutiae Termination & Bifurcation — Segment 6 & 7 = 15.32s."""
         section = self.get_section_hdr("Minutiae: Điểm đặc trưng cục bộ")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         definition = self.ct("Minutiae = các điểm mà đường vân bị gián đoạn", font_size=20, color=TEXT_COLOR)
         definition.next_to(section, DOWN, buff=0.45)
-        self.play(FadeIn(definition, shift=UP * 0.2), run_time=0.6)
-        # Total 1.2s
+        self.play(FadeIn(definition, shift=UP * 0.2), run_time=0.8)
+
+        # Segment 6 starts at 29.16s, Segment 7 starts at 34.26s (Gap = 5.10s).
+        # Section (0.8s) + definition (0.8s) + wait (3.50s) = 5.10s.
+        self.wait(3.50)
 
         # ── 1. Card Kết thúc (Termination) ──
         term_box = create_rounded_box(width=3.6, height=3.2, fill_color=CHART_BLUE, fill_opacity=0.06, stroke_color=CHART_BLUE, stroke_width=1.5)
@@ -304,36 +315,36 @@ class Scene03Features(Scene):
         others_desc = self.ct("Đảo, Cầu nối, Điểm...", font_size=12, color=TEXT_DIM)
         others_desc.next_to(others_box, DOWN, buff=0.15)
 
-        # ── Animations (1.2s - 7.5s) ──
-        self.play(FadeIn(term_box), FadeIn(bifur_box), FadeIn(others_box), run_time=0.8) # Total 2.0s
+        # ── Animations (34.26s - 42.26s) ──
+        self.play(FadeIn(term_box), FadeIn(bifur_box), FadeIn(others_box), run_time=1.2)
         self.play(
             FadeIn(term_title), FadeIn(bifur_title), FadeIn(others_title),
             FadeIn(term_desc), FadeIn(bifur_desc), FadeIn(others_desc),
-            run_time=0.6
-        ) # Total 2.6s
-        self.play(Create(term_ridges), Create(bifur_ridges), Create(others_ridges), run_time=1.5) # Total 4.1s
-        self.play(FadeIn(term_point, scale=2), FadeIn(bifur_point, scale=2), run_time=0.6) # Total 4.7s
+            run_time=0.8
+        )
+        self.play(Create(term_ridges), Create(bifur_ridges), Create(others_ridges), run_time=1.8)
+        self.play(FadeIn(term_point, scale=2), FadeIn(bifur_point, scale=2), run_time=0.8)
 
-        # Radar ping effects (4.7s - 5.5s)
+        # Radar ping effects
         pulse_term = Circle(radius=0.05, color=MINUTIA_TERM, stroke_width=2.5).move_to(term_point.get_center())
         pulse_bifur = Circle(radius=0.05, color=MINUTIA_BIFUR, stroke_width=2.5).move_to(bifur_point.get_center())
         self.add(pulse_term, pulse_bifur)
         self.play(
             pulse_term.animate.scale(6).set_stroke(opacity=0),
             pulse_bifur.animate.scale(6).set_stroke(opacity=0),
-            run_time=0.8
+            run_time=1.0
         )
-        self.remove(pulse_term, pulse_bifur) # Total 5.5s
+        self.remove(pulse_term, pulse_bifur)
 
-        # Red Cross (X) over Column 3 (5.5s - 6.5s)
+        # Red Cross (X) over Column 3
         cross_line1 = Line(others_box.get_corner(UL) + RIGHT*0.3 + DOWN*0.3, others_box.get_corner(DR) + LEFT*0.3 + UP*0.3, color=MISMATCH_COLOR, stroke_width=4)
         cross_line2 = Line(others_box.get_corner(DL) + RIGHT*0.3 + UP*0.3, others_box.get_corner(UR) + LEFT*0.3 + DOWN*0.3, color=MISMATCH_COLOR, stroke_width=4)
         cross = VGroup(cross_line1, cross_line2)
         cross_lbl = self.ct("Khó nhận diện tự động", font_size=13, color=MISMATCH_COLOR, weight=BOLD).next_to(others_desc, DOWN, buff=0.15)
         
-        self.play(Create(cross), FadeIn(cross_lbl), run_time=1.0) # Total 6.5s
+        self.play(Create(cross), FadeIn(cross_lbl), run_time=1.2)
 
-        # Green highlights and checkmarks for Column 1 & 2 (6.5s - 7.5s)
+        # Green highlights and checkmarks for Column 1 & 2
         check1 = MathTex(r"\checkmark", color=MATCH_COLOR, font_size=28).next_to(term_title, RIGHT, buff=0.1)
         check2 = MathTex(r"\checkmark", color=MATCH_COLOR, font_size=28).next_to(bifur_title, RIGHT, buff=0.1)
         
@@ -341,19 +352,22 @@ class Scene03Features(Scene):
             term_box.animate.set_stroke(color=MATCH_COLOR, width=2.5),
             bifur_box.animate.set_stroke(color=MATCH_COLOR, width=2.5),
             FadeIn(check1), FadeIn(check2),
-            run_time=1.0
-        ) # Total 7.5s
-
-        # Target Segment 3 = 14.35s. FadeOut = 0.8s. Need wait: 14.35 - 7.5 - 0.8 = 6.05s.
-        self.wait(6.05)
+            run_time=1.2
+        )
+        
+        # Segment 7 starts at 34.26s, Segment 8 starts at 44.48s (Gap = 10.22s).
+        # boxes_in (1.2s) + labels_in (0.8s) + ridges_in (1.8s) + dots_in (0.8s) + pulses (1.0s)
+        # + cross_in (1.2s) + check_in (1.2s) + wait (0.62s) + FadeOut (0.8s) = 8.62s.
+        # Silence gap (0.8s) = 10.22s.
+        self.wait(0.62)
         self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
         self.wait(0.8)
 
     def minutiae_representation(self):
-        """Biểu diễn toán học m = {x, y, θ} — Segment 4 = 10.61s."""
+        """Biểu diễn toán học m = {x, y, θ} — Segment 8 & 9 = 10.16s."""
         section = self.get_section_hdr("Biểu diễn Minutiae")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         # Grid Axes
         axes = Axes(
@@ -368,7 +382,7 @@ class Scene03Features(Scene):
             x_label=Text("x", font_size=18, color=TEXT_DIM),
             y_label=Text("y", font_size=18, color=TEXT_DIM),
         )
-        self.play(Create(axes), FadeIn(axes_labels), run_time=1.0) # Total 1.6s
+        self.play(Create(axes), FadeIn(axes_labels), run_time=1.2)
 
         # Plotted points representing minutiae features
         minutiae_data = [
@@ -385,14 +399,14 @@ class Scene03Features(Scene):
 
         self.play(
             LaggedStart(*[FadeIn(p, scale=2) for p in points], lag_ratio=0.18),
-            run_time=1.5,
-        ) # Total 3.1s
+            run_time=1.8,
+        )
 
-        # Highlight point 0: (2, 3, PI/4) (3.1s - 3.8s)
+        # Highlight point 0: (2, 3, PI/4)
         pt0_pos = axes.c2p(2, 3)
-        self.play(Indicate(points[0], color=PRIMARY, scale_factor=1.8), run_time=0.7) # Total 3.8s
+        self.play(Indicate(points[0], color=PRIMARY, scale_factor=1.8), run_time=1.0)
 
-        # Projection lines and angle arc for the highlighted minutia (3.8s - 5.0s)
+        # Projection lines and angle arc for the highlighted minutia
         proj_x = DashedLine(pt0_pos, axes.c2p(2, 0), color=MINUTIA_TERM, stroke_width=2)
         proj_y = DashedLine(pt0_pos, axes.c2p(0, 3), color=MINUTIA_TERM, stroke_width=2)
         ref_line = DashedLine(pt0_pos, pt0_pos + RIGHT * 0.8, color=TEXT_DIM, stroke_width=1.5)
@@ -410,19 +424,24 @@ class Scene03Features(Scene):
         self.play(
             Create(proj_x), Create(proj_y), Create(ref_line), 
             Create(theta_arc), FadeIn(theta_lbl), 
-            run_time=1.2
-        ) # Total 5.0s
+            run_time=1.5
+        )
 
-        # Formula and example - right side (5.0s - 5.8s)
+        # Segment 8 starts at 44.48s, Segment 9 starts at 51.16s (Gap = 6.68s).
+        # Section (0.8s) + axes (1.2s) + points (1.8s) + indicate (1.0s) + projections (1.5s)
+        # + wait (0.38s) = 6.68s.
+        self.wait(0.38)
+
+        # Formula and example - right side (Segment 9 starts at 51.16s)
         formula = MathTex(r"m = \{x,\; y,\; \theta\}", font_size=42, color=TEXT_BRIGHT)
         formula.shift(RIGHT * 3.4 + UP * 1.4)
         
         example = MathTex(r"m_1 = \{2.0,\; 3.0,\; 45^\circ\}", font_size=32, color=PRIMARY)
         example.next_to(formula, DOWN, buff=0.25)
         
-        self.play(Write(formula), Write(example), run_time=0.8) # Total 5.8s
+        self.play(Write(formula), Write(example), run_time=1.0)
 
-        # Explanatory descriptions (5.8s - 6.4s)
+        # Explanatory descriptions
         desc_xy = VGroup(
             MathTex(r"(x,\, y)", font_size=24, color=MINUTIA_TERM),
             self.ct("= tọa độ vị trí", font_size=18, color=TEXT_DIM),
@@ -435,9 +454,9 @@ class Scene03Features(Scene):
         
         descs = VGroup(desc_xy, desc_th).arrange(DOWN, aligned_edge=LEFT, buff=0.3)
         descs.next_to(example, DOWN, buff=0.45)
-        self.play(FadeIn(descs, shift=UP * 0.15), run_time=0.6) # Total 6.4s
+        self.play(FadeIn(descs, shift=UP * 0.15), run_time=0.8)
 
-        # Legend/Color guide (6.4s - 7.0s)
+        # Legend/Color guide
         legend = VGroup(
             VGroup(
                 Dot(color=MINUTIA_TERM, radius=0.07),
@@ -449,8 +468,9 @@ class Scene03Features(Scene):
             ).arrange(RIGHT, buff=0.15),
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.18)
         legend.next_to(descs, DOWN, buff=0.4)
-        self.play(FadeIn(legend), run_time=0.6) # Total 7.0s
+        self.play(FadeIn(legend), run_time=0.8)
 
-        # Target Segment 4 = 10.61s. FadeOut = 0.8s. Need wait: 10.61 - 7.0 - 0.8 = 2.81s.
-        self.wait(2.81)
+        # Segment 9 starts at 51.16s, Scene 3 ends at 54.64s (Gap = 3.48s).
+        # formula_in (1.0s) + desc_in (0.8s) + legend_in (0.8s) + wait (0.08s) + FadeOut (0.8s) = 3.48s.
+        self.wait(0.08)
         self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)

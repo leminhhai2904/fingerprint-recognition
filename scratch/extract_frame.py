@@ -21,8 +21,8 @@ def extract(video_path, time_sec, out_path):
     container.close()
 
 if __name__ == "__main__":
-    extract(
-        r"media/videos/scene05_correlation/480p15/Scene05Correlation.mp4",
-        58.0,
-        r"scratch/frame_58s.png"
-    )
+    video = r"media/videos/scene06_minutiae_new/480p15/Scene06Minutiae.mp4"
+    extract(video, 9.0, r"scratch/frame_scene06_zoom_fixed.png")
+    extract(video, 35.5, r"scratch/frame_scene06_local_fixed.png")
+    extract(video, 55.0, r"scratch/frame_scene06_tessellation_fixed.png")
+    extract(video, 65.0, r"scratch/frame_scene06_hybrid_fixed.png")

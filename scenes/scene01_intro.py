@@ -48,20 +48,30 @@ class Scene01Intro(Scene):
         fp_icon = create_fingerprint_simple(scale=0.6, color=RIDGE_COLOR)
         fp_icon.set_opacity(0.15).scale(2).move_to(ORIGIN)
 
-        # Drawing the fingerprint in the background (Premium effect)
-        self.play(Create(fp_icon, run_time=2.0))
+        # Drawing the fingerprint in the background with a laser sweep (Premium effect)
+        scan_line = Line(LEFT * 4.5, RIGHT * 4.5, color=RIDGE_COLOR, stroke_width=3.5).set_opacity(0.9)
+        scan_glow = Line(LEFT * 4.5, RIGHT * 4.5, color=RIDGE_COLOR, stroke_width=8.0).set_opacity(0.2)
+        scan_group = VGroup(scan_glow, scan_line)
+        scan_group.move_to(UP * 2.5)
+        self.add(scan_group)
         self.play(
-            Write(title, run_time=1.2),
-            FadeIn(top_label, shift=DOWN * 0.3, run_time=0.8),
+            FadeIn(fp_icon, run_time=2.0),
+            scan_group.animate.move_to(DOWN * 2.5),
+            Write(title, run_time=1.5),
+            FadeIn(top_label, shift=DOWN * 0.3, run_time=1.0),
+            run_time=2.0,
+            rate_func=linear
         )
+        self.play(FadeOut(scan_group, run_time=0.2))
         self.play(
             Create(line_left, run_time=0.6),
             Create(line_right, run_time=0.6),
         )
         self.play(FadeIn(subtitle, shift=UP * 0.2, run_time=0.8))
 
-        # Total anim time = 2.0 + 1.2 + 0.6 + 0.8 = 4.6s. Need 7.52s before FadeOut completes.
-        self.wait(1.92)
+        # Total anim time = 2.0 (sweep) + 0.2 (fade scan) + 0.6 (lines) + 0.8 (subtitle) = 3.6s.
+        # Need 7.92s total (including 1.0s FadeOut). Wait = 7.92 - 3.6 - 1.0 = 3.32s.
+        self.wait(3.32)
         self.play(
             FadeOut(VGroup(title, top_label, lines, subtitle, fp_icon)),
             run_time=1.0,
@@ -242,28 +252,50 @@ class Scene01Intro(Scene):
         section.to_edge(UP, buff=0.8)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
 
-        properties = [
-            ("Duy nhất", "Ngay cả cặp sinh đôi\ncùng trứng cũng có\nvân tay khác nhau"),
-            ("Bền vững", "Ổn định từ tháng thứ 7\nthai kỳ và không\nthay đổi suốt đời"),
-            ("Đo lường được", "Có thể thu nhận\nbằng các cảm biến\nđiện tử hiện đại"),
-        ]
+        # Tạo icon 1: Vân tay nhỏ cho "Duy nhất"
+        icon1 = create_fingerprint_simple(color=CHART_BLUE).scale_to_fit_height(0.45)
+        
+        # Tạo icon 2: Ký hiệu vô cực đại diện cho sự "Bền vững" suốt đời
+        icon2 = VMobject(color=CHART_ORANGE, stroke_width=2.5)
+        t_vals = np.linspace(0, 2 * PI, 60)
+        points = []
+        for t in t_vals:
+            denom = 1 + np.sin(t)**2
+            x = 0.55 * np.cos(t) / denom
+            y = 0.55 * np.sin(t) * np.cos(t) / denom
+            points.append([x, y, 0])
+        icon2.set_points_smoothly([np.array(p) for p in points])
+        icon2.scale_to_fit_height(0.42)
+        
+        # Tạo icon 3: Đồ thị/Cảm biến cho "Đo lường được"
+        icon3 = VGroup(
+            Line(LEFT * 0.2 + DOWN * 0.2, LEFT * 0.2 + UP * 0.1, color="#bd93f9", stroke_width=3.0),
+            Line(ORIGIN + DOWN * 0.2, ORIGIN + UP * 0.25, color="#bd93f9", stroke_width=3.0),
+            Line(RIGHT * 0.2 + DOWN * 0.2, RIGHT * 0.2 + UP * 0.0, color="#bd93f9", stroke_width=3.0),
+            Line(LEFT * 0.35 + DOWN * 0.2, RIGHT * 0.35 + DOWN * 0.2, color="#bd93f9", stroke_width=1.5),
+        )
+        icon3.scale_to_fit_height(0.42)
 
         cards = VGroup()
-        for title_text, desc_text in properties:
+        for idx, (title_text, desc_text, color, icon) in enumerate([
+            ("Duy nhất", "Ngay cả cặp sinh đôi\ncùng trứng cũng có\nvân tay khác nhau", CHART_BLUE, icon1),
+            ("Bền vững", "Ổn định từ tháng thứ 7\nthai kỳ và không\nthay đổi suốt đời", CHART_ORANGE, icon2),
+            ("Đo lường được", "Có thể thu nhận\nbằng các cảm biến\nđiện tử hiện đại", "#bd93f9", icon3),
+        ]):
             card = create_rounded_box(
                 width=3.5, height=2.8,
-                fill_color=SECONDARY, fill_opacity=0.3,
-                stroke_color=PRIMARY, stroke_width=1.5,
+                fill_color=color, fill_opacity=0.08,
+                stroke_color=color, stroke_width=1.5,
             )
-            title = self.ct(title_text, font_size=24, color=TEXT_BRIGHT, weight=BOLD)
+            title = self.ct(title_text, font_size=22, color=color, weight=BOLD)
             desc = Paragraph(
                 *desc_text.split("\n"),
-                font_size=30,
+                font_size=28,
                 color=TEXT_DIM,
                 line_spacing=1.2,
                 alignment="center"
-            ).scale(15 / 30)
-            content = VGroup(title, desc).arrange(DOWN, buff=0.25)
+            ).scale(13.5 / 28)
+            content = VGroup(icon, title, desc).arrange(DOWN, buff=0.18)
             content.move_to(card.get_center())
             cards.add(VGroup(card, content))
 
@@ -288,50 +320,43 @@ class Scene01Intro(Scene):
         section.to_edge(UP, buff=0.8)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.4)
 
-        patterns = [
-            ("Vân Móc", "Khoảng 65% dân số.\nĐường vân cong\nvà quay trở lại."),
-            ("Vân Xoáy", "Khoảng 30% dân số.\nĐường vân xoay tròn\nquanh tâm."),
-            ("Vân Cung", "Khoảng 5% dân số.\nĐường vân đi từ\nbên này sang bên kia."),
-        ]
-
         assets_dir = Path(__file__).resolve().parent.parent / "assets"
 
-        # Load SVG assets
-        loop_icon = SVGMobject(str(assets_dir / "loop.svg")).scale_to_fit_height(1.4).set_color(RIDGE_COLOR)
-        whorl_icon = SVGMobject(str(assets_dir / "whorl.svg")).scale_to_fit_height(1.4).set_color(RIDGE_COLOR)
-        arch_icon = SVGMobject(str(assets_dir / "arch.svg")).scale_to_fit_height(1.4).set_color(RIDGE_COLOR)
-
-        icons = VGroup(loop_icon, whorl_icon, arch_icon)
+        patterns = [
+            ("Vân Móc", "Khoảng 65% dân số.\nĐường vân cong\nvà quay trở lại.", CHART_BLUE, SVGMobject(str(assets_dir / "loop.svg")).scale_to_fit_height(1.4)),
+            ("Vân Xoáy", "Khoảng 30% dân số.\nĐường vân xoay tròn\nquanh tâm.", CHART_ORANGE, SVGMobject(str(assets_dir / "whorl.svg")).scale_to_fit_height(1.4)),
+            ("Vân Cung", "Khoảng 5% dân số.\nĐường vân đi từ\nbên này sang bên kia.", "#bd93f9", SVGMobject(str(assets_dir / "arch.svg")).scale_to_fit_height(1.4)),
+        ]
 
         cards = VGroup()
-        for icon, (title_text, desc_text) in zip(icons, patterns):
-            bg = create_rounded_box(width=2.8, height=2.8, fill_color=SECONDARY, fill_opacity=0.1, stroke_color=PRIMARY, stroke_width=1.5)
-            icon.move_to(bg.get_center() + UP * 0.1)
+        for title_text, desc_text, color, icon in patterns:
+            bg = create_rounded_box(width=2.8, height=2.8, fill_color=color, fill_opacity=0.08, stroke_color=color, stroke_width=1.5)
+            icon.set_color(color).move_to(bg.get_center() + UP * 0.1)
             icon_group = VGroup(bg, icon)
 
-            title = self.ct(title_text, font_size=20, color=TEXT_BRIGHT, weight=BOLD)
+            title = self.ct(title_text, font_size=20, color=color, weight=BOLD)
             desc = Paragraph(
                 *desc_text.split("\n"),
                 font_size=28, color=TEXT_DIM, alignment="center", line_spacing=1.2
-            ).scale(15 / 28)
+            ).scale(13.5 / 28)
             card = VGroup(icon_group, title, desc).arrange(DOWN, buff=0.25)
             cards.add(card)
 
         cards.arrange(RIGHT, buff=0.6).shift(DOWN * 0.4)
 
-        self.wait(1.26)
+        self.wait(1.12)
         # Show cards
         self.play(FadeIn(cards[0], shift=UP * 0.5), run_time=0.4)
-        self.wait(1.68)
+        self.wait(2.1)
         self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.4)
-        self.wait(0.43)
+        self.wait(1.1)
         self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.4)
 
         # Target = 6.64s.
-        # Elapsed so far: 0.4 (section) + 1.26 (wait) + 0.4 (card0) + 1.68 (wait) + 0.4 (card1) + 0.43 (wait) + 0.4 (card2) = 4.97s.
-        # Remaining wait before fadeout: 6.64 - 4.97 - 0.8 (FadeOut) = 0.87s.
-        self.wait(0.87)
-        self.play(FadeOut(VGroup(section, cards)), run_time=0.8)
+        # Elapsed so far: 0.4 (section) + 1.12 (wait) + 0.4 (card0) + 2.1 (wait) + 0.4 (card1) + 1.1 (wait) + 0.4 (card2) = 5.92s.
+        # Remaining wait before fadeout: 6.64 - 5.92 - 0.4 (FadeOut) = 0.32s.
+        self.wait(0.32)
+        self.play(FadeOut(VGroup(section, cards)), run_time=0.4)
 
     def history_timeline(self):
         """Lịch sử phát triển nhận dạng vân tay — Segment 5 = 26.57s."""
@@ -346,7 +371,7 @@ class Scene01Intro(Scene):
         events = [
             (-4.5, "1686", "Malpighi\nghi nhận\nđường vân", CHART_BLUE),
             (-1.8, "1880", "Fauld đề xuất\ntính duy nhất\ncủa vân tay", CHART_ORANGE),
-            (-0.2, "1888", "Galton giới thiệu\nđặc trưng\nminutiae", CHART_PURPLE),
+            (-0.2, "1888", "Galton giới thiệu\nđặc trưng\nminutiae", "#bd93f9"),
             (1.8, "1899", "Hệ thống phân\nloại Henry\nra đời", PRIMARY),
             (4.2, "1960s", "Hệ thống AFIS\ntự động đầu\ntiên", CORE_POINT),
         ]
@@ -355,7 +380,10 @@ class Scene01Intro(Scene):
         labels = VGroup()
 
         # Wait times for timeline elements (aligned with historical overview narration)
-        wait_times = [2.24, 2.0, 2.0, 2.86, 4.22]
+        # Segment 10: 0.6s (line draw) + 0.5s (event 1) + 1.44s (wait) = 2.54s + 0.2s = 2.74s (start to start)
+        # Segment 11: 0.5s (event 2) + 1.8s (wait) + 0.5s (event 3) + 2.2s (wait) + 0.5s (event 4) + 2.86s (wait) = 8.36s (start to start)
+        # Segment 12: 0.5s (event 5) + 3.72s (wait) + 0.5s (fadeout) = 4.72s (start to start)
+        wait_times = [1.44, 1.8, 2.2, 2.86, 3.72]
 
         for i, (x, year, desc, color) in enumerate(events):
             dot = Dot(point=np.array([x, -0.2, 0]), color=color, radius=0.1)
@@ -410,7 +438,7 @@ class Scene01Intro(Scene):
             FadeIn(fbi_panel, shift=UP * 0.3),
             run_time=0.5
         )
-        self.wait(1.38)
+        self.wait(2.0)
 
         self.play(
             FadeOut(forensic_title, shift=UP * 0.2),
@@ -445,7 +473,7 @@ class Scene01Intro(Scene):
         app2_group = VGroup(app2, app2_content)
         
         # App 3: Kiểm soát an ninh
-        app3 = create_rounded_box(width=3.6, height=2.8, fill_color=CHART_PURPLE, fill_opacity=0.08, stroke_color=CHART_PURPLE, stroke_width=1.5)
+        app3 = create_rounded_box(width=3.6, height=2.8, fill_color="#bd93f9", fill_opacity=0.08, stroke_color="#bd93f9", stroke_width=1.5)
         app3_title = self.ct("Kiểm Soát An Ninh", font_size=15, color=TEXT_BRIGHT, weight=BOLD)
         app3_desc = Paragraph(
             "Khóa cửa thông minh nhà ở",
@@ -459,7 +487,7 @@ class Scene01Intro(Scene):
         
         self.play(
             FadeIn(civil_title, shift=DOWN * 0.2),
-            run_time=0.3
+            run_time=0.4
         )
         self.play(
             LaggedStart(
@@ -468,17 +496,12 @@ class Scene01Intro(Scene):
                 FadeIn(app3_group, shift=UP * 0.3),
                 lag_ratio=0.2
             ),
-            run_time=0.7
+            run_time=0.8
         )
 
-        # Target duration: 24.06s.
-        # Accumulated so far: 1.4 (line + section) + 17.32 (timeline events) + 0.5 (timeline out)
-        #                     + 0.5 (fbi in) + 1.38 (fbi wait) + 0.5 (fbi out)
-        #                     + 0.3 (civil in) + 0.7 (apps in) = 22.6s.
-        # Wait remaining: 24.06s + 17.72s (timeline part) = 41.78s total section?
-        # Wait! Let's check: total section duration is 24.06s.
-        # Accumulated for forensic + civil = 0.5 (timeline out) + 0.5 (fbi in) + 1.38 (fbi wait) + 0.5 (fbi out) + 0.3 (civil in) + 0.7 (apps in) = 3.88s.
-        # Total duration for Segment 13 is 8.24s.
-        # Wait remaining for Segment 13: 8.24s - 3.88s - 1.0s (FadeOut) = 3.36s.
-        self.wait(3.36)
+        # Segment 13 duration is 8.24s.
+        # Forensic Panel: 0.5s (fbi in) + 2.0s (fbi wait) + 0.5s (fbi out) = 3.0s
+        # Civilian Panel: 0.4s (civil in) + 0.8s (apps in) + 3.04s (civil wait) + 1.0s (FadeOut) = 5.24s
+        # Total: 3.0s + 5.24s = 8.24s (Exact)
+        self.wait(3.04)
         self.play(FadeOut(VGroup(section, civil_title, civil_apps)), run_time=1.0)

@@ -46,20 +46,20 @@ class Scene04Extraction(Scene):
         subtitle = self.ct("Các thuật toán xử lý ảnh và nhị phân hóa", font_size=22, color=TEXT_DIM)
         group = VGroup(num, title, subtitle).arrange(DOWN, buff=0.4)
 
-        self.play(FadeIn(num, scale=1.5), run_time=0.5)
-        self.play(FadeIn(title, shift=UP * 0.3), run_time=1.0)
-        self.play(FadeIn(subtitle, shift=UP * 0.2), run_time=1.0)
+        self.play(FadeIn(num, scale=1.3), run_time=0.7)
+        self.play(FadeIn(title, shift=UP * 0.2), run_time=1.0)
+        self.play(FadeIn(subtitle, shift=UP * 0.15), run_time=1.0)
 
-        # Total play = 2.5s. Target = 5.76s.
-        self.wait(2.26)
-        self.play(FadeOut(group), run_time=1.0)
-        self.wait(0.8)
+        # Total play = 2.7s. Target = 6.24s.
+        # title_in (2.7s) + wait (2.74s) + FadeOut (0.8s) = 6.24s.
+        self.wait(2.74)
+        self.play(FadeOut(group), run_time=0.8)
 
     def orientation_and_frequency(self):
-        """Trường hướng & Trường tần số — Segment 2 = 13.25s."""
+        """Trường hướng & Trường tần số — Segment 2 & 3 = 13.88s."""
         section = self.get_section_hdr("Trường Hướng & Trường Tần Số")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         # 1. Trường hướng (Trái)
         orient_label = self.ct("Trường hướng đường vân", font_size=16, color=CHART_BLUE, weight=BOLD)
@@ -106,37 +106,50 @@ class Scene04Extraction(Scene):
         text_part_f = self.ct("= tần số đường vân cục bộ", font_size=13, color=TEXT_DIM)
         freq_formula = VGroup(formula_part_f, text_part_f).arrange(RIGHT, buff=0.1).next_to(freq_box, DOWN, buff=0.3)
 
-        # Hoạt ảnh xuất hiện
-        self.play(FadeIn(field_box), FadeIn(orient_label), run_time=0.8) # Total 1.4s
-        self.play(FadeIn(scan_bar), run_time=0.4) # Total 1.8s
+        # Hoạt ảnh xuất hiện Segment 2 (6.24s -> 15.06s, duration = 8.82s)
+        self.play(FadeIn(field_box), FadeIn(orient_label), run_time=1.0)
+        self.play(FadeIn(scan_bar), run_time=0.6)
         
         # Di chuyển laser quét qua trường hướng và xoay dần các kim hướng
         self.play(
             scan_bar.animate.move_to(field_box.get_bottom() + UP * 0.2),
             LaggedStart(*[FadeIn(seg, scale=0.5) for seg in field], lag_ratio=0.015),
-            run_time=2.0
-        ) # Total 3.8s
-        self.play(FadeOut(scan_bar), FadeIn(orient_formula), run_time=0.6) # Total 4.4s
+            run_time=2.5
+        )
+        self.play(FadeOut(scan_bar), FadeIn(orient_formula), run_time=0.8)
 
-        # Xuất hiện trường tần số
-        self.play(FadeIn(freq_box), FadeIn(freq_label), run_time=0.8) # Total 5.2s
-        self.play(Create(freq_ridges), run_time=1.0) # Total 6.2s
+        # Xuất hiện trường tần số trong Segment 2 để dàn trải timing mượt mà
+        self.play(FadeIn(freq_box), FadeIn(freq_label), run_time=1.0)
+        self.play(Create(freq_ridges), run_time=1.0)
         
-        # Vẽ sóng sin tần số bên dưới cùng dấu ngoặc đo khoảng cách d
-        self.play(Create(sin_curve), FadeIn(axes), run_time=1.2) # Total 7.4s
-        self.play(GrowFromCenter(brace), FadeIn(spacing_label), run_time=0.6) # Total 8.0s
-        self.play(FadeIn(freq_formula), run_time=0.6) # Total 8.6s
+        # Tổng Segment 2 = 0.8 + 1.0 + 0.6 + 2.5 + 0.8 + 1.0 + 1.0 = 7.70s.
+        # Wait để khớp với start Segment 3 (15.06s): 8.82 - 7.70 = 1.12s.
+        self.wait(1.12)
 
-        # Target = 13.25s. Play = 8.6s. Wait = 13.25 - 8.6 - 1.0 = 3.65s
-        self.wait(3.65)
-        self.play(FadeOut(VGroup(section, field_box, orient_label, field, orient_formula, freq_box, freq_label, freq_ridges, axes, sin_curve, brace, spacing_label, freq_formula)), run_time=1.0)
-        self.wait(0.8)
+        # Hoạt ảnh Segment 3 (15.06s -> 20.12s, duration = 5.06s)
+        # Vẽ sóng sin tần số bên dưới cùng dấu ngoặc đo khoảng cách d
+        self.play(Create(sin_curve), FadeIn(axes), run_time=1.2)
+        self.play(GrowFromCenter(brace), FadeIn(spacing_label), run_time=0.8)
+        self.play(FadeIn(freq_formula), run_time=0.8)
+
+        # Tổng play Segment 3 = 1.2 + 0.8 + 0.8 = 2.80s.
+        # Muốn có thời gian nghỉ (resting wait) trước khi tắt:
+        # Tổng Segment 3 = 2.80 + wait + 0.8 (FadeOut) = 5.06s -> wait = 1.46s.
+        self.wait(1.46)
+        self.play(
+            FadeOut(VGroup(
+                section, field_box, orient_label, field, orient_formula,
+                freq_box, freq_label, freq_ridges, axes, sin_curve, brace,
+                spacing_label, freq_formula
+            )),
+            run_time=0.8
+        )
 
     def segmentation_and_singularities(self):
-        """Phân vùng & Phát hiện vùng kỳ dị — Segment 3 = 17.59s."""
+        """Phân vùng & Phát hiện vùng kỳ dị — Segment 4, 5, 6 = 20.32s."""
         section = self.get_section_hdr("Phân Vùng & Điểm Kỳ Dị")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         # Trái: Segmentation Card
         seg_box = create_rounded_box(width=5.0, height=3.5, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_ORANGE, stroke_width=1.5)
@@ -214,8 +227,8 @@ class Scene04Extraction(Scene):
         poincare_content.move_to(poincare_box.get_center())
         poincare_group = VGroup(poincare_box, poincare_content).shift(RIGHT * 3.3 + DOWN * 0.25)
 
-        # Trực quan hóa Segmentation trước
-        self.play(FadeIn(seg_box), FadeIn(seg_title), run_time=0.8) # Total 1.4s
+        # Trực quan hóa Segmentation trước (Segment 4: 20.12s -> 22.52s, duration = 2.40s)
+        self.play(FadeIn(seg_box), FadeIn(seg_title), run_time=1.0)
         
         # Show raw image with noise
         self.play(
@@ -223,41 +236,44 @@ class Scene04Extraction(Scene):
             FadeIn(finger_lines),
             FadeIn(noise_dots),
             FadeIn(bg_lbl),
-            run_time=0.8
-        ) # Total 2.2s
+            run_time=0.6
+        )
         
-        # Segmentation separation animation:
-        # 1. Draw boundary and show foreground label
+        # Hoạt ảnh Segment 5 (22.52s -> 29.36s, duration = 6.84s)
+        # 1. Vẽ vòng biên và nhãn foreground
         self.play(
             Create(fg_boundary),
             FadeIn(fg_lbl, shift=UP * 0.12),
             run_time=1.0
-        ) # Total 3.2s
+        )
         
-        # 2. Show red crosses over the noise dots to indicate rejection
+        # 2. Đánh dấu chéo đỏ các hạt nhiễu bên ngoài
         self.play(
             FadeIn(crosses, scale=0.5),
             run_time=0.6
-        ) # Total 3.8s
+        )
         
-        # 3. Discard noise (fade out dots and crosses, dark mask/dim raw box, show description)
+        # 3. Loại bỏ nhiễu và làm tối phần background
         self.play(
             FadeOut(noise_dots),
             FadeOut(crosses),
             raw_img_box.animate.set_color(TEXT_DIM).set_opacity(0.4),
             FadeIn(seg_desc, shift=UP * 0.12),
             run_time=1.0
-        ) # Total 4.8s
-        self.wait(1.5) # Total 6.3s
-
+        )
+        
         # Xuất hiện Poincaré Card
-        self.play(FadeIn(poincare_box), FadeIn(poincare_title), run_time=0.8) # Total 7.1s
-        self.play(Write(formula), run_time=1.0) # Total 8.1s
-        self.play(FadeIn(results, shift=UP * 0.15), run_time=1.2) # Total 9.3s
+        self.play(FadeIn(poincare_box), FadeIn(poincare_title), run_time=1.0)
+        self.play(Write(formula), run_time=1.2)
+        self.play(FadeIn(results, shift=UP * 0.15), run_time=1.2)
+        
+        # Tổng Segment 5 = 1.0 + 0.6 + 1.0 + 1.0 + 1.2 + 1.2 = 6.00s.
+        # Chờ nốt: 6.84 - 6.00 = 0.84s.
+        self.wait(0.84)
 
-        # --- CHẠY HOẠT ẢNH TÍCH PHÂN ĐƯỜNG POINCARÉ ---
+        # --- CHẠY HOẠT ẢNH TÍCH PHÂN ĐƯỜNG POINCARÉ --- (Segment 6: 29.36s -> 40.44s, duration = 11.08s)
         # Tạm thời dọn dẹp các công thức ở thẻ phải để biểu diễn tích phân
-        self.play(FadeOut(formula), FadeOut(results), run_time=0.8) # Total 10.1s
+        self.play(FadeOut(formula), FadeOut(results), run_time=0.8)
 
         pc_center = poincare_box.get_center() + DOWN * 0.3
         cand_dot = Dot(pc_center, color=CORE_POINT, radius=0.09)
@@ -288,8 +304,8 @@ class Scene04Extraction(Scene):
             FadeIn(cand_dot), FadeIn(cand_lbl),
             FadeIn(circle_c), FadeIn(circle_lbl),
             FadeIn(orient_segs), FadeIn(accum_vec),
-            run_time=1.0
-        ) # Total 9.7s
+            run_time=1.5
+        )
 
         # Chạy tích phân: Con trỏ di chuyển trên đường cong, vector hướng tích lũy góc xoay
         counter_val = ValueTracker(0)
@@ -306,9 +322,9 @@ class Scene04Extraction(Scene):
             MoveAlongPath(pointer, circle_c),
             Rotate(accum_vec, angle=PI, about_point=pc_center),
             counter_val.animate.set_value(180),
-            run_time=3.0,
+            run_time=4.0,
             rate_func=linear
-        ) # Total 12.7s
+        )
         
         counter_lbl.remove_updater(update_cnt)
         res_lbl = self.ct("P(C) = +180° (Phát hiện Điểm lõi)", font_size=12, color=MATCH_COLOR, weight=BOLD).next_to(circle_c, DOWN, buff=0.15)
@@ -317,18 +333,21 @@ class Scene04Extraction(Scene):
             FadeOut(counter_lbl),
             FadeIn(res_lbl, shift=UP * 0.1),
             Indicate(cand_dot, color=MATCH_COLOR, scale_factor=2.0),
-            run_time=1.0
-        ) # Total 13.7s
-        # Target = 17.59s. Play = 13.7s. Need 17.59s - 13.7s - 1.0s (FadeOut) = 2.89s
-        self.wait(2.89)
+            run_time=1.2
+        )
+
+        # Tổng Segment 6 = 0.8 + 1.5 + 4.0 + 1.2 = 7.50s.
+        # Khoảng nghỉ tĩnh (resting wait) trước khi chuyển cảnh:
+        # Tổng = 7.50 + wait + 1.0 (FadeOut) = 11.08s -> wait = 2.58s.
+        self.wait(2.58)
         self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
         self.wait(0.8)
 
     def enhancement_pipeline(self):
-        """Pipeline xử lý: xám -> tăng cường -> nhị phân -> làm mỏng — Segment 4 = 17.21s."""
+        """Pipeline xử lý: xám -> tăng cường -> nhị phân -> làm mỏng — Segment 7, 8, 9 = 17.88s."""
         section = self.get_section_hdr("Quy Trình Tiền Xử Lý Ảnh Vân Tay")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         stages = [
             ("1. Ảnh Xám", TEXT_DIM, self._create_grayscale_sim()),
@@ -364,33 +383,56 @@ class Scene04Extraction(Scene):
         # Đường laser quét reveal
         scan_group = Line(UP * 2.2, DOWN * 2.2, color=PRIMARY, stroke_width=4.0).move_to(LEFT * 6.8)
 
-        self.play(FadeIn(scan_group), run_time=0.5) # Total 1.1s
+        # Segment 7 (starts at 40.44s, Segment 8 starts at 44.02s, gap = 3.58s)
+        self.play(FadeIn(scan_group), run_time=0.5)
+        card0_x = stage_groups[0].get_center()[0]
+        self.play(
+            scan_group.animate.move_to([card0_x, 0, 0]),
+            FadeIn(stage_groups[0], shift=UP * 0.25),
+            run_time=1.0
+        )
+        # Chờ nốt Segment 7: 3.58 - 0.8 - 0.5 - 1.0 = 1.28s.
+        self.wait(1.28)
 
-        # Quét laser lần lượt để kích hoạt/hiển thị từng Card xử lý ảnh
-        for idx, sg in enumerate(stage_groups):
-            card_x = sg.get_center()[0]
-            self.play(
-                scan_group.animate.move_to([card_x, 0, 0]),
-                FadeIn(sg, shift=UP * 0.25),
-                run_time=0.8
-            )
-            if idx < len(arrows):
-                self.play(GrowArrow(arrows[idx]), run_time=0.3)
+        # Segment 8 (starts at 44.02s, Segment 9 starts at 54.72s, gap = 10.70s)
+        card1_x = stage_groups[1].get_center()[0]
+        self.play(GrowArrow(arrows[0]), run_time=0.4)
+        self.play(
+            scan_group.animate.move_to([card1_x, 0, 0]),
+            FadeIn(stage_groups[1], shift=UP * 0.25),
+            run_time=1.2
+        )
+        self.play(FadeIn(filter_desc, shift=UP * 0.15), run_time=1.2)
+        # Chờ nốt Segment 8: 10.70 - 0.4 - 1.2 - 1.2 = 7.90s.
+        self.wait(7.90)
 
-        self.play(scan_group.animate.move_to(RIGHT * 6.8), run_time=0.6) # Total 5.8s
-        self.play(FadeOut(scan_group), run_time=0.4) # Total 6.2s
-        self.play(FadeIn(filter_desc, shift=UP * 0.15), run_time=0.8) # Total 7.0s
-
-        # Target = 17.21s. Anim play = 7.0s. Need 17.21s - 7.0s - 1.0s (FadeOut) = 9.21s
-        self.wait(9.21)
-        self.play(FadeOut(VGroup(section, stage_groups, arrows, filter_desc)), run_time=1.0)
-        self.wait(0.8)
+        # Segment 9 (starts at 54.72s, Segment 10 starts at 58.32s, gap = 3.60s)
+        card2_x = stage_groups[2].get_center()[0]
+        self.play(GrowArrow(arrows[1]), run_time=0.3)
+        self.play(
+            scan_group.animate.move_to([card2_x, 0, 0]),
+            FadeIn(stage_groups[2], shift=UP * 0.25),
+            run_time=0.6
+        )
+        card3_x = stage_groups[3].get_center()[0]
+        self.play(GrowArrow(arrows[2]), run_time=0.3)
+        self.play(
+            scan_group.animate.move_to([card3_x, 0, 0]),
+            FadeIn(stage_groups[3], shift=UP * 0.25),
+            run_time=0.6
+        )
+        self.play(scan_group.animate.move_to(RIGHT * 6.8), run_time=0.3)
+        self.play(FadeOut(scan_group), run_time=0.1)
+        
+        # Khoảng nghỉ tĩnh (resting wait) để người xem ngắm nhìn toàn bộ quy trình:
+        self.wait(0.6)
+        self.play(FadeOut(VGroup(section, stage_groups, arrows, filter_desc)), run_time=0.8)
 
     def crossing_number_extraction(self):
-        """Thuật toán Crossing Number (CN) — Segment 5 = 13.66s."""
+        """Thuật toán Crossing Number (CN) & Lọc Minutiae — Segment 10, 11, 12 = 12.70s."""
         section = self.get_section_hdr("Trích Xuất Minutiae: Crossing Number")
         section.to_edge(UP, buff=0.6)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6) # Total 0.6s
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         # Công thức Crossing Number
         formula = MathTex(
@@ -407,11 +449,6 @@ class Scene04Extraction(Scene):
         p_label = MathTex(r"P", font_size=18, color=PRIMARY).next_to(p_center, UR, buff=0.02)
 
         # Định vị các điểm lân cận P1 đến P8 (theo chiều kim đồng hồ)
-        # Các chỉ số ô vuông trong grid 3x3:
-        # [0, 1, 2]
-        # [3, 4, 5]
-        # [6, 7, 8]
-        # Thứ tự quét vòng quanh P: P1 (ô 1), P2 (ô 2), P3 (ô 5), P4 (ô 8), P5 (ô 7), P6 (ô 6), P7 (ô 3), P8 (ô 0)
         neighbor_indices = [1, 2, 5, 8, 7, 6, 3, 0]
         neighbors = VGroup()
         for n_idx in neighbor_indices:
@@ -424,26 +461,35 @@ class Scene04Extraction(Scene):
             self.ct("CN(P) = 2  →  Đường vân liên tục bình thường", font_size=13, color=TEXT_DIM)
         ).arrange(DOWN, aligned_edge=LEFT, buff=0.2).shift(LEFT * 3.3 + DOWN * 1.1)
 
-        self.play(Write(formula), run_time=0.8) # Total 1.4s
-        self.play(Create(grid), FadeIn(grid_lbl), run_time=1.0) # Total 2.4s
-        self.play(FadeIn(p_center), FadeIn(p_label), run_time=0.5) # Total 2.9s
+        # Segment 10: 58.32s -> 62.76s (duration = 4.44s)
+        self.play(Write(formula), run_time=1.0)
+        self.play(Create(grid), FadeIn(grid_lbl), run_time=1.2)
+        self.play(FadeIn(p_center), FadeIn(p_label), run_time=0.6)
 
         # Quét vòng quanh P để minh họa thuật toán CN
         sweep_circle = Circle(radius=0.55, color=PRIMARY, stroke_width=2).move_to(p_center)
-        self.play(FadeIn(sweep_circle), run_time=0.4) # Total 3.3s
-        
+        self.play(FadeIn(sweep_circle), run_time=0.5)
+        # Chờ nốt Segment 10: 4.44 - 0.8 (section) - 1.0 (formula) - 1.2 (grid) - 0.6 (p) - 0.5 (sweep) = 0.34s.
+        self.wait(0.34)
+
+        # Segment 11: 62.76s -> 67.52s (duration = 4.76s)
         self.play(
             Rotate(sweep_circle, angle=2*PI, about_point=p_center.get_center()),
-            LaggedStart(*[FadeIn(n, scale=1.4) for n in neighbors], lag_ratio=0.12),
-            run_time=2.2
-        ) # Total 5.5s
-        
-        self.play(FadeOut(sweep_circle), FadeIn(cases), run_time=0.8) # Total 6.3s
+            LaggedStart(*[FadeIn(n, scale=1.4) for n in neighbors], lag_ratio=0.15),
+            run_time=2.8
+        )
+        self.play(FadeOut(sweep_circle), FadeIn(cases), run_time=1.0)
+        # Chờ nốt Segment 11: 4.76 - 2.8 - 1.0 = 0.96s.
+        self.wait(0.96)
 
-        # Target = 13.66s. Play = 6.3s. Need 13.66s - 6.3s - 1.0s (FadeOut) = 6.36s.
-        self.wait(6.36)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
-        self.wait(0.8)
+        # Segment 12: 67.52s -> 71.02s (duration = 3.50s)
+        # Giữ lưới Crossing Number trên màn hình và đợi trước khi tắt cảnh
+        # 3.50 - 0.8 (FadeOut) = 2.70s.
+        self.wait(2.70)
+        self.play(
+            FadeOut(VGroup(section, formula, grid, grid_lbl, p_center, p_label, neighbors, cases)),
+            run_time=0.8
+        )
 
     # ─── MÔ PHỎNG XỬ LÝ ẢNH (ẢNH MINH HỌA ĐƯỜNG VÂN CHO CÁC CARD) ───────────
 
