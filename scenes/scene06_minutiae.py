@@ -174,7 +174,7 @@ class Scene06Minutiae(Scene):
 
         # Right: Discrete Hough space accumulator grid
         grid_box = create_rounded_box(width=5.5, height=4.2, fill_color=SECONDARY, fill_opacity=0.15, stroke_color=CHART_BLUE, stroke_width=1.5).shift(RIGHT * 3.4 + DOWN * 0.4)
-        grid_title = self.ct("Bộ Tích Lũy Hough Space (Δx, Δy)", font_size=15, color=CHART_BLUE, weight=BOLD).next_to(grid_box.get_top(), DOWN, buff=0.2)
+        grid_title = self.ct("Bộ tích lũy không gian Hough (Δx, Δy)", font_size=15, color=CHART_BLUE, weight=BOLD).next_to(grid_box.get_top(), DOWN, buff=0.2)
 
         grid_center = grid_box.get_center() + DOWN * 0.4
         hough_grid = VGroup()
@@ -196,7 +196,7 @@ class Scene06Minutiae(Scene):
         
         peak_glow = peak_cell.copy().set_fill(MATCH_COLOR, opacity=0.8).set_stroke(MATCH_COLOR, width=2.0)
         peak_target = Circle(radius=0.35, color=MATCH_COLOR, stroke_width=2).move_to(peak_cell.get_center())
-        peak_lbl = self.ct("Đỉnh (Peak)", font_size=11, color=MATCH_COLOR, weight=BOLD).next_to(peak_target, UR, buff=0.05)
+        peak_lbl = self.ct("Đỉnh tích lũy", font_size=11, color=MATCH_COLOR, weight=BOLD).next_to(peak_target, UR, buff=0.05)
         peak_indicator = VGroup(peak_glow, peak_target, peak_lbl)
 
         # Animate entrance
@@ -245,7 +245,7 @@ class Scene06Minutiae(Scene):
 
         # Left panel: Local Matching
         local_box = create_rounded_box(width=5.5, height=4.2, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_BLUE, stroke_width=1.5).shift(LEFT * 3.4 + DOWN * 0.4)
-        local_title = self.ct("Đối sánh Cục bộ (Local Matching)", font_size=15, color=CHART_BLUE, weight=BOLD).next_to(local_box.get_top(), DOWN, buff=0.2)
+        local_title = self.ct("Đối sánh cục bộ", font_size=15, color=CHART_BLUE, weight=BOLD).next_to(local_box.get_top(), DOWN, buff=0.2)
         
         # Local Star structure simulation
         local_center = local_box.get_center() + UP * 0.2
@@ -279,7 +279,7 @@ class Scene06Minutiae(Scene):
 
         # Right panel: Global Matching
         global_box = create_rounded_box(width=5.5, height=4.2, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=CHART_ORANGE, stroke_width=1.5).shift(RIGHT * 3.4 + DOWN * 0.4)
-        global_title = self.ct("Đối sánh Toàn cục (Global Matching)", font_size=15, color=CHART_ORANGE, weight=BOLD).next_to(global_box.get_top(), DOWN, buff=0.2)
+        global_title = self.ct("Đối sánh toàn cục", font_size=15, color=CHART_ORANGE, weight=BOLD).next_to(global_box.get_top(), DOWN, buff=0.2)
 
         # Global Delaunay-like constellation mesh
         global_center = global_box.get_center() + UP * 0.2
@@ -310,7 +310,7 @@ class Scene06Minutiae(Scene):
 
         # Hybrid banner at bottom
         hybrid_banner = create_rounded_box(width=6.0, height=0.7, fill_color=MATCH_COLOR, fill_opacity=0.15, stroke_color=MATCH_COLOR, stroke_width=1.5).shift(DOWN * 3.0)
-        hybrid_lbl = self.ct("Giải pháp hiện đại: Kết hợp ưu điểm cả hai (Hybrid)", font_size=13, color=MATCH_COLOR, weight=BOLD).move_to(hybrid_banner)
+        hybrid_lbl = self.ct("Giải pháp hiện đại: Đối sánh kết hợp", font_size=13, color=MATCH_COLOR, weight=BOLD).move_to(hybrid_banner)
 
         # Entrance
         self.play(FadeIn(local_box), FadeIn(local_title), FadeIn(global_box), FadeIn(global_title), run_time=1.0) # Total 1.6s
@@ -338,11 +338,11 @@ class Scene06Minutiae(Scene):
 
         # Left side: Core area & tessellation sectors
         core_box = create_rounded_box(width=5.5, height=4.2, fill_color=SECONDARY, fill_opacity=0.2, stroke_color=PRIMARY, stroke_width=1.5).shift(LEFT * 3.4 + DOWN * 0.4)
-        core_title = self.ct("Tessellation chia nhỏ quanh Core", font_size=15, color=PRIMARY, weight=BOLD).next_to(core_box.get_top(), DOWN, buff=0.2)
+        core_title = self.ct("Tessellation quanh Điểm lõi", font_size=15, color=PRIMARY, weight=BOLD).next_to(core_box.get_top(), DOWN, buff=0.2)
 
         core_center = core_box.get_center() + DOWN * 0.2
         core_pt = Dot(core_center, color=CORE_POINT, radius=0.08)
-        core_lbl = self.ct("Core", font_size=9, color=CORE_POINT, weight=BOLD).next_to(core_pt, UP, buff=0.05)
+        core_lbl = self.ct("Điểm lõi", font_size=9, color=CORE_POINT, weight=BOLD).next_to(core_pt, UP, buff=0.05)
         
         # Circular sectors around core
         sectors = VGroup()

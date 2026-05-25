@@ -2,7 +2,7 @@
 Scene 7: Tóm tắt & Kết luận (Conclusion)
 - Tóm tắt quy trình (Recap Pipeline) gồm 3 giai đoạn chính với hiệu ứng laser pulse & ripple
 - Đánh giá hiệu suất: FVC, EER Graph (FMR vs FNMR), NIST FpVTE 2003 database card
-- Thách thức mở & Tạo vân tay nhân tạo SFinGe với ValueTracker count-up
+- Thách thức mở & Tạo vân tay ảo SFinGe với ValueTracker count-up
 - Lời cảm ơn & Kết thúc + Vẽ vân tay nền quay chậm
 """
 from manim import *
@@ -256,7 +256,7 @@ class Scene07Conclusion(Scene):
         self.wait(0.8)
 
     def open_challenges(self):
-        """Bốn thách thức mở & Tạo vân tay nhân tạo SFinGe — Segment 3 = 22.99s."""
+        """Bốn thách thức mở & Tạo vân tay ảo SFinGe — Segment 3 = 22.99s."""
         section = self.get_section_hdr("Thách thức mở & Công nghệ SFinGe")
         section.to_edge(UP, buff=0.6)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
@@ -287,7 +287,7 @@ class Scene07Conclusion(Scene):
 
         # Right panel: SFinGe Generator
         sf_box = create_rounded_box(width=5.5, height=4.2, fill_color=SECONDARY, fill_opacity=0.15, stroke_color=CHART_PURPLE, stroke_width=1.5).shift(RIGHT * 3.4 + DOWN * 0.4)
-        sf_title = self.ct("Sinh vân tay nhân tạo SFinGe", font_size=16, color=CHART_PURPLE, weight=BOLD).next_to(sf_box.get_top(), DOWN, buff=0.2)
+        sf_title = self.ct("Sinh vân tay ảo SFinGe", font_size=16, color=CHART_PURPLE, weight=BOLD).next_to(sf_box.get_top(), DOWN, buff=0.2)
 
         sf_center = sf_box.get_center() + DOWN * 0.2
         sf_ridges = VGroup()
@@ -305,11 +305,11 @@ class Scene07Conclusion(Scene):
         scan_group = VGroup(scan_line, scan_line_glow)
 
         counter_val = ValueTracker(0)
-        counter_lbl = self.ct("Ảnh nhân tạo: 0", font_size=12, color=PRIMARY, weight=BOLD).next_to(sf_box, DOWN, buff=0.1)
+        counter_lbl = self.ct("Ảnh vân tay ảo: 0", font_size=12, color=PRIMARY, weight=BOLD).next_to(sf_box, DOWN, buff=0.1)
 
         def update_counter(mobject):
             mobject.become(
-                self.ct(f"Ảnh nhân tạo: {int(counter_val.get_value()):,}", font_size=12, color=PRIMARY, weight=BOLD).next_to(sf_box, DOWN, buff=0.1)
+                self.ct(f"Ảnh vân tay ảo: {int(counter_val.get_value()):,}", font_size=12, color=PRIMARY, weight=BOLD).next_to(sf_box, DOWN, buff=0.1)
             )
 
         counter_lbl.add_updater(update_counter)
