@@ -239,9 +239,9 @@ class Scene02Sensing(Scene):
         # Segment 6 starts at 31.68s, Segment 7 starts at 36.42s (Gap = 4.74s)
         # explanation_in (0.8s) + wait (2.14s) + FadeOut (1.0s) = 3.94s.
         # Silence gap (0.8s) = 4.74s.
-        self.wait(2.14)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
-        self.wait(0.8) # Silence gap
+        self.wait(2.44)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
+        self.wait(0.7) # Silence gap
 
     def sensor_comparison(self):
         """So sánh ba loại cảm biến — Segment 7 - 10 = 23.64s."""
@@ -289,7 +289,7 @@ class Scene02Sensing(Scene):
         self.play(FadeIn(cards[0], shift=UP * 0.5), run_time=0.8)
         # Segment 7 starts at 36.42s, Segment 8 starts at 40.74s (Gap = 4.32s).
         # section_in (0.6s) + card0_in (0.8s) + wait (2.92s) = 4.32s.
-        self.wait(2.92)
+        self.wait(2.62)
 
         # 2. Fade in Solid-state card
         self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.8)
@@ -434,9 +434,9 @@ class Scene02Sensing(Scene):
 
         # Segment 10 starts at 51.08s, Segment 11 starts at 60.06s (Gap = 8.98s).
         # restore_pop (1.0s) + card2_in (0.8s) + waves_up (1.0s) + waves_down (1.0s) + waves_out (0.8s) + wait (2.58s) + FadeOut (1.0s) + silence_gap (0.8s) = 8.98s.
-        self.wait(2.58)
-        self.play(FadeOut(VGroup(section, cards)), run_time=1.0)
-        self.wait(0.8) # Silence gap
+        self.wait(3.18)
+        self.play(FadeOut(VGroup(section, cards)), run_time=0.6)
+        self.wait(0.6) # Silence gap
 
     def new_tech_and_challenges(self):
         """Thách thức và công nghệ mới — Segment 11 - 13 = 14.10s."""
@@ -491,5 +491,5 @@ class Scene02Sensing(Scene):
         # Segment 13 starts at 70.48s, End of Scene 2 at 74.16s (Gap = 3.68s).
         # Highlight FBI CJIS standard bullet point
         self.play(Indicate(right_points[2], color=PRIMARY, scale_factor=1.15), run_time=1.0)
-        self.wait(1.68)
+        self.wait(4.08)
         self.play(FadeOut(VGroup(section, both)), run_time=1.0)
