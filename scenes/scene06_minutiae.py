@@ -493,7 +493,7 @@ class Scene06Minutiae(Scene):
             FadeIn(dist_lbl),
             run_time=1.0
         )
-        self.wait(0.32) # Wait remaining for Segment 12
+        self.wait(0.72) # Wait remaining for Segment 12
         
         # Xóa toàn bộ các thành phần liên quan đến FingerCode để chuyển sang Segment 13
         self.play(
@@ -506,7 +506,7 @@ class Scene06Minutiae(Scene):
             FadeOut(vector_box2), FadeOut(vector_lbl2),
             run_time=1.0
         )
-        self.wait(0.74)
+        self.wait(0.34)
         
         # Segment 13 (61.70s - 67.14s, dur 5.44s)
         # Trực quan hoá kết hợp đa đặc trưng (minutiae, trường hướng, mật độ vân) tạo thành các thẻ Dashboard
