@@ -342,7 +342,7 @@ class Scene07Conclusion(Scene):
         )
 
         # Wait remaining time of Segment 4 (23.34s - 21.44s = 1.90s)
-        self.wait(1.90)
+        self.wait(3.00)
 
         # Gap transition to EER Graph (Total Gap: 1.74s from 23.34s to 25.08s)
         # Fade out FVC Elements (0.8s) - ends at 24.14s
@@ -354,7 +354,7 @@ class Scene07Conclusion(Scene):
             )),
             run_time=0.8
         )
-        self.wait(0.94) # Wait remainder of gap
+        self.wait(0.54) # Wait remainder of gap
 
     def eer_explanation(self):
         """
@@ -527,6 +527,8 @@ class Scene07Conclusion(Scene):
             run_time=1.0
         )
 
+        self.wait(0.5)   
+
         # Anim 3: Fade in Right Sub-content (1.0s) - ends at 35.24s
         self.play(
             FadeIn(right_content, shift=UP * 0.15),
@@ -534,15 +536,15 @@ class Scene07Conclusion(Scene):
         )
 
         # Wait remaining time of Segment 6 (37.84s - 35.24s = 2.60s)
-        self.wait(2.60)
+        self.wait(1.70)
 
         # Gap transition to Open Challenges (Total Gap: 1.38s from 37.84s to 39.22s)
         # Fade out NIST board (0.8s) - ends at 38.64s
         self.play(
             FadeOut(VGroup(nist_bg, left_sub, right_sub, left_content, right_content)),
-            run_time=0.8
+            run_time=0.4
         )
-        self.wait(0.58) # Wait remainder of gap
+        self.wait(0.28) # Wait remainder of gap
 
     def open_challenges(self):
         """
@@ -901,7 +903,7 @@ class Scene07Conclusion(Scene):
         # Let's wait for 7.0s, during which the background watermark rotates slowly.
         self.play(
             Rotate(bg_fingerprint, angle=0.16, about_point=ORIGIN),
-            run_time=7.0,
+            run_time=5.0,
             rate_func=linear
         )
 
