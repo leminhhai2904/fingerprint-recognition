@@ -13,3 +13,4 @@ wheels/
 media/
 .vscode/
 .env
+manim.cfg
