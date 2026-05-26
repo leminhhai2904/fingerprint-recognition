@@ -20,13 +20,9 @@ class Scene01Intro(Scene):
     def construct(self):
         scene_setup(self)
         self.intro_title()
-        self.wait(0.76)
         self.what_is_fingerprint()
-        self.wait(0.01)
         self.why_fingerprints()
-        self.wait(1.32)
         self.fingerprint_patterns()
-        self.wait(3.34)
         self.history_timeline()
 
     def ct(self, text_str, font_size=18, color=TEXT_COLOR, weight=NORMAL, **kw):
@@ -34,7 +30,7 @@ class Scene01Intro(Scene):
         return Text(text_str, font_size=36, color=color, weight=weight, **kw).scale(font_size / 36)
 
     def intro_title(self):
-        """Chuỗi hoạt hình tiêu đề mở đầu — Segment 1 = 7.92s."""
+        """Chuỗi hoạt hình tiêu đề mở đầu — Segment 1 & 2."""
         top_label = self.ct("N H Ậ N   D Ạ N G   M Ẫ U", font_size=16, color=TEXT_DIM).to_edge(UP, buff=1.5)
         title = self.ct("Nhận Dạng Vân Tay", font_size=56, color=TEXT_BRIGHT, weight=BOLD)
 
@@ -53,34 +49,48 @@ class Scene01Intro(Scene):
         scan_glow = Line(LEFT * 4.5, RIGHT * 4.5, color=RIDGE_COLOR, stroke_width=8.0).set_opacity(0.2)
         scan_group = VGroup(scan_glow, scan_line)
         scan_group.move_to(UP * 2.5)
+        
+        # Segment 1 (0.22s - 0.90s, dur 0.68s)
+        self.wait(0.22)
+        self.play(FadeIn(top_label, shift=DOWN * 0.3), run_time=0.4)
+        self.wait(0.28)
+        
+        # Gap between Segment 1 & Segment 2 (0.90s - 1.06s, dur 0.16s)
+        self.wait(0.16)
+        
+        # Segment 2 (1.06s - 7.52s, dur 6.46s)
         self.add(scan_group)
         self.play(
             FadeIn(fp_icon, run_time=2.0),
             scan_group.animate.move_to(DOWN * 2.5),
             Write(title, run_time=1.5),
-            FadeIn(top_label, shift=DOWN * 0.3, run_time=1.0),
             run_time=2.0,
             rate_func=linear
         )
         self.play(FadeOut(scan_group, run_time=0.2))
         self.play(
-            Create(line_left, run_time=0.6),
-            Create(line_right, run_time=0.6),
+            Create(line_left, run_time=0.5),
+            Create(line_right, run_time=0.5),
         )
-        self.play(FadeIn(subtitle, shift=UP * 0.2, run_time=0.8))
+        self.play(FadeIn(subtitle, shift=UP * 0.2, run_time=0.7))
 
-        # Total anim time = 2.0 (sweep) + 0.2 (fade scan) + 0.6 (lines) + 0.8 (subtitle) = 3.6s.
-        # Need 7.92s total (including 1.0s FadeOut). Wait = 7.92 - 3.6 - 1.0 = 3.32s.
-        self.wait(3.32)
+        # Total Segment 2 elapsed: 2.0 (sweep) + 0.2 (fade out scan) + 0.5 (create lines) + 0.7 (subtitle) = 3.40s.
+        # Remaining Segment 2 duration: 6.46s - 3.40s = 3.06s.
+        self.wait(3.06)
+        
+        # Gap between Segment 2 & Segment 3 (7.52s - 8.28s, dur 0.76s)
+        # Use this gap to fade out the title group
         self.play(
             FadeOut(VGroup(title, top_label, lines, subtitle, fp_icon)),
-            run_time=1.0,
+            run_time=0.76,
         )
 
     def what_is_fingerprint(self):
-        """Giải thích vân tay là gì — Segment 2 = 20.83s."""
+        """Giải thích vân tay là gì — Segments 3 to 7."""
         section = get_section_title("Vân tay là gì?")
         section.to_edge(UP, buff=0.6)
+        
+        # Segment 3 (8.28s - 11.68s, dur 3.40s)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.4)
 
         # Tạo visualization đường vân (trái)
@@ -130,15 +140,22 @@ class Scene01Intro(Scene):
         self.play(FadeOut(scan_line, run_time=0.2))
 
         self.play(
-            Create(ridge_arrow, run_time=0.4),
-            FadeIn(ridge_label, run_time=0.4),
-            Create(valley_arrow, run_time=0.4),
-            FadeIn(valley_label, run_time=0.4),
+            Create(ridge_arrow, run_time=0.3),
+            FadeIn(ridge_label, run_time=0.3),
+            Create(valley_arrow, run_time=0.3),
+            FadeIn(valley_label, run_time=0.3),
         )
         self.play(FadeIn(desc, shift=UP * 0.2, run_time=0.4))
-        self.wait(1.38)  # Wait for Segment 3 end and gap before Segment 4
+        
+        # Segment 3 duration: 3.40s.
+        # Elapsed: 0.4 (section) + 0.2 + 1.0 + 0.2 (scan) + 0.3 (arrows) + 0.4 (desc) = 2.50s.
+        # Segment 3 resting wait: 3.40 - 2.50 = 0.90s.
+        self.wait(0.90)
+        
+        # Gap between Segment 3 & 4 (11.68s - 12.26s, dur 0.58s)
+        self.wait(0.58)
 
-        # --- PHẦN PHÁT TRIỂN THÊM (DNA & Bào Thai & Mao mạch & Sinh đôi) ---
+        # --- Segment 4 (12.26s - 15.24s, dur 2.98s) ---
         dna_box = create_rounded_box(width=5.2, height=3.6, fill_color=SECONDARY, fill_opacity=0.15, stroke_color=PRIMARY, stroke_width=1.5)
         dna_box.shift(RIGHT * 3.6 + DOWN * 0.3)
         dna_title = self.ct("Yếu tố hình thành", font_size=18, color=PRIMARY, weight=BOLD).next_to(dna_box.get_top(), DOWN, buff=0.25)
@@ -175,36 +192,49 @@ class Scene01Intro(Scene):
 
         initial_factors_seg4 = VGroup(dna_helix, dna_label, fluid_waves, fluid_label)
 
-        self.play(FadeIn(dna_box), FadeIn(dna_title), run_time=0.5)
+        self.play(FadeIn(dna_box), FadeIn(dna_title), run_time=0.4)
         self.play(
             LaggedStart(
                 FadeIn(dna_helix), FadeIn(dna_label),
                 FadeIn(fluid_waves), FadeIn(fluid_label),
-                lag_ratio=0.2
+                lag_ratio=0.15
             ),
-            run_time=1.2
-        )
-        self.wait(2.22)  # Wait for Segment 4 end and gap before Segment 5
-
-        # Segment 5 starts at 16.18s
-        self.play(
-            Create(capillary), FadeIn(capillary_label),
             run_time=1.0
         )
-        self.wait(2.12)  # Wait for Segment 5 end
+        # Segment 4 duration: 2.98s.
+        # Elapsed: 0.4 + 1.0 = 1.40s.
+        # Segment 4 resting wait: 2.98 - 1.40 = 1.58s.
+        self.wait(1.58)  
+        
+        # Gap between Segment 4 & 5 (15.24s - 16.18s, dur 0.94s)
+        self.wait(0.94)
 
-        # Gap between Segment 5 and 6 (19.30s to 20.58s)
+        # --- Segment 5 (16.18s - 19.30s, dur 3.12s) ---
+        self.play(
+            Create(capillary), FadeIn(capillary_label),
+            run_time=0.8
+        )
+        # Segment 5 duration: 3.12s.
+        # Elapsed: 0.80s.
+        # Segment 5 resting wait: 3.12 - 0.80 = 2.32s.
+        self.wait(2.32)  
+        
+        # Gap between Segment 5 & 6 (19.30s - 20.58s, dur 1.28s)
         self.wait(1.28)
 
-        # Segment 6 starts at 20.58s
+        # --- Segment 6 (20.58s - 25.18s, dur 4.60s) ---
         self.play(
-            Indicate(fluid_waves, color=PRIMARY, scale_factor=1.3),
-            Indicate(capillary, color="#e63946", scale_factor=1.3),
-            run_time=1.5
+            Indicate(fluid_waves, color=PRIMARY, scale_factor=1.25),
+            Indicate(capillary, color="#e63946", scale_factor=1.25),
+            run_time=1.2
         )
-        self.wait(3.1)  # Wait for Segment 6 end
+        # Segment 6 duration: 4.60s.
+        # Elapsed: 1.20s.
+        # Segment 6 resting wait: 4.60 - 1.20 = 3.40s.
+        self.wait(3.40)  
 
-        # --- TWIN COMPARISON POP-UP INSIDE BOX ---
+        # --- Segment 7 (25.18s - 30.24s, dur 5.06s) ---
+        # TWIN COMPARISON POP-UP INSIDE BOX
         twin_title = self.ct("Sinh đôi cùng trứng", font_size=16, color=PRIMARY, weight=BOLD).next_to(dna_box.get_top(), DOWN, buff=0.25)
         
         twin_a = self.ct("Sinh đôi A", font_size=12, color=CHART_BLUE).move_to(dna_box.get_center() + LEFT * 1.3 + UP * 0.6)
@@ -224,33 +254,39 @@ class Scene01Intro(Scene):
         
         twin_group = VGroup(twin_title, twin_a, twin_b, fp_a, fp_b, diff_a, diff_b, arrow_a, arrow_b, neq_sign, twin_desc)
 
-        # Transition DNA box interior (Segment 7 starts at 25.18s)
+        # Transition DNA box interior
         self.play(
             FadeOut(initial_factors_seg4),
             FadeOut(capillary),
             FadeOut(capillary_label),
             FadeOut(dna_title),
-            run_time=0.5
+            run_time=0.4
         )
         self.play(
             FadeIn(twin_group),
             run_time=0.8
         )
         self.play(
-            Indicate(neq_sign, color=MISMATCH_COLOR, scale_factor=1.6),
-            Indicate(diff_a, color=MINUTIA_TERM, scale_factor=2),
-            Indicate(diff_b, color=MINUTIA_BIFUR, scale_factor=2),
-            run_time=1.2
+            Indicate(neq_sign, color=MISMATCH_COLOR, scale_factor=1.4),
+            Indicate(diff_a, color=MINUTIA_TERM, scale_factor=1.6),
+            Indicate(diff_b, color=MINUTIA_BIFUR, scale_factor=1.6),
+            run_time=1.0
         )
 
-        self.wait(1.56)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
+        # Segment 7 duration: 5.06s.
+        # Elapsed: 0.4 + 0.8 + 1.0 = 2.20s.
+        # Segment 7 resting wait: 5.06 - 2.20 = 2.86s.
+        # We wait 2.26s, then fade out the whole scene during the remaining 0.6s.
+        self.wait(2.26)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=0.6)
 
     def why_fingerprints(self):
-        """Tại sao vân tay là đặc trưng sinh trắc tốt — Segment 3 = 11.33s."""
+        """Tại sao vân tay là đặc trưng sinh trắc tốt — Segment 8."""
         section = get_section_title("Tại sao dùng vân tay?")
         section.to_edge(UP, buff=0.8)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        
+        # Segment 8 (30.24s - 42.16s, dur 11.92s)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.4)
 
         # Tạo icon 1: Vân tay nhỏ cho "Duy nhất"
         icon1 = create_fingerprint_simple(color=CHART_BLUE).scale_to_fit_height(0.45)
@@ -301,23 +337,28 @@ class Scene01Intro(Scene):
 
         cards.arrange(RIGHT, buff=0.5).shift(DOWN * 0.3)
 
-        # Show sequentially: Total target = 11.92s before next section
-        self.wait(2.2)
+        self.wait(2.0)
         self.play(FadeIn(cards[0], shift=UP * 0.5, scale=0.9), run_time=0.6)
         self.wait(1.56)
         self.play(FadeIn(cards[1], shift=UP * 0.5, scale=0.9), run_time=0.6)
         self.wait(3.07)
         self.play(FadeIn(cards[2], shift=UP * 0.5, scale=0.9), run_time=0.6)
         
-        # 0.6 (section in) + 2.2 (wait) + 0.6 (card 0) + 1.56 (wait) + 0.6 (card 1) + 3.07 (wait) + 0.6 (card 2) = 9.23s.
-        # Remaining wait before fadeout: 11.92s - 9.23s - 0.8s (FadeOut) = 1.89s.
-        self.wait(1.89)
-        self.play(FadeOut(VGroup(section, cards)), run_time=0.8)
+        # Segment 8 duration: 11.92s.
+        # Elapsed: 0.4 (section) + 2.0 + 0.6 (card 0) + 1.56 + 0.6 (card 1) + 3.07 + 0.6 (card 2) = 8.83s.
+        # Segment 8 resting wait: 11.92s - 8.83s = 3.09s.
+        self.wait(3.09)
+        
+        # Gap between Segment 8 & 9 (42.16s - 43.48s, dur 1.32s)
+        # Use this gap to fade out the cards without trailing wait
+        self.play(FadeOut(VGroup(section, cards)), run_time=1.32)
 
     def fingerprint_patterns(self):
-        """Phân loại vân tay cơ bản — Segment 4 = 8.21s."""
+        """Phân loại vân tay cơ bản — Segment 9."""
         section = get_section_title("Các mẫu vân tay cơ bản")
         section.to_edge(UP, buff=0.8)
+        
+        # Segment 9 (43.48s - 50.12s, dur 6.64s)
         self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.4)
 
         assets_dir = Path(__file__).resolve().parent.parent / "assets"
@@ -344,29 +385,32 @@ class Scene01Intro(Scene):
 
         cards.arrange(RIGHT, buff=0.6).shift(DOWN * 0.4)
 
-        self.wait(1.12)
+        self.wait(0.82)
         # Show cards
-        self.play(FadeIn(cards[0], shift=UP * 0.5), run_time=0.4)
-        self.wait(2.1)
-        self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.4)
-        self.wait(1.1)
-        self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.4)
+        self.play(FadeIn(cards[0], shift=UP * 0.5), run_time=0.6)
+        self.wait(1.2)
+        self.play(FadeIn(cards[1], shift=UP * 0.5), run_time=0.6)
+        self.wait(1.0)
+        self.play(FadeIn(cards[2], shift=UP * 0.5), run_time=0.6)
 
-        # Target = 6.64s.
-        # Elapsed so far: 0.4 (section) + 1.12 (wait) + 0.4 (card0) + 2.1 (wait) + 0.4 (card1) + 1.1 (wait) + 0.4 (card2) = 5.92s.
-        # Remaining wait before fadeout: 6.64 - 5.92 - 0.4 (FadeOut) = 0.32s.
-        self.wait(0.32)
-        self.play(FadeOut(VGroup(section, cards)), run_time=0.4)
+        # Segment 9 duration: 6.64s.
+        # Elapsed: 0.4 (section) + 0.82 (wait) + 0.6 (card 0) + 1.2 (wait) + 0.6 (card 1) + 1.0 (wait) + 0.6 (card 2) = 5.22s.
+        # Segment 9 resting wait (1.42s) and Gap (3.34s) combined:
+        # We wait 3.76s before the FadeOut, and FadeOut during the final 1.0s.
+        self.wait(1.76)
+        self.play(FadeOut(VGroup(section, cards)), run_time=0.6)
 
     def history_timeline(self):
-        """Lịch sử phát triển nhận dạng vân tay — Segment 5 = 26.57s."""
+        """Lịch sử phát triển nhận dạng vân tay — Segments 10 to 13."""
         section = get_section_title("Lịch sử phát triển")
         section.to_edge(UP, buff=0.8)
-        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.6)
+        
+        # Segment 10 start (53.46s - 54.98s, dur 1.52s)
+        self.play(FadeIn(section, shift=DOWN * 0.3), run_time=0.8)
 
         timeline_line = Line(LEFT * 5.5, RIGHT * 5.5, color=TEXT_DIM, stroke_width=2)
         timeline_line.shift(DOWN * 0.2)
-        self.play(Create(timeline_line), run_time=0.8)
+        self.play(Create(timeline_line), run_time=0.4)
 
         events = [
             (-4.5, "1686", "Malpighi\nghi nhận\nđường vân", CHART_BLUE),
@@ -379,39 +423,147 @@ class Scene01Intro(Scene):
         dots = VGroup()
         labels = VGroup()
 
-        # Wait times for timeline elements (aligned with historical overview narration)
-        # Segment 10: 0.6s (line draw) + 0.5s (event 1) + 1.44s (wait) = 2.54s + 0.2s = 2.74s (start to start)
-        # Segment 11: 0.5s (event 2) + 1.8s (wait) + 0.5s (event 3) + 2.2s (wait) + 0.5s (event 4) + 2.86s (wait) = 8.36s (start to start)
-        # Segment 12: 0.5s (event 5) + 3.72s (wait) + 0.5s (fadeout) = 4.72s (start to start)
-        wait_times = [1.44, 1.8, 2.2, 2.86, 3.72]
+        # Event 1: Malpighi 1686
+        x1, year1, desc1, color1 = events[0]
+        dot1 = Dot(point=np.array([x1, -0.2, 0]), color=color1, radius=0.1)
+        year_label1 = self.ct(year1, font_size=18, color=color1, weight=BOLD)
+        year_label1.next_to(dot1, UP, buff=0.25)
+        desc_label1 = Paragraph(
+            *desc1.split("\n"),
+            font_size=28,
+            color=TEXT_DIM,
+            line_spacing=1.1,
+            alignment="center"
+        ).scale(13 / 28)
+        desc_label1.next_to(year_label1, UP, buff=0.15)
+        tick1 = Line(np.array([x1, -0.35, 0]), np.array([x1, -0.05, 0]), color=color1, stroke_width=2)
 
-        for i, (x, year, desc, color) in enumerate(events):
-            dot = Dot(point=np.array([x, -0.2, 0]), color=color, radius=0.1)
-            year_label = self.ct(year, font_size=18, color=color, weight=BOLD)
-            year_label.next_to(dot, UP, buff=0.25)
-            desc_label = Paragraph(
-                *desc.split("\n"),
-                font_size=28,
-                color=TEXT_DIM,
-                line_spacing=1.1,
-                alignment="center"
-            ).scale(13 / 28)
-            desc_label.next_to(year_label, UP, buff=0.15)
-            tick = Line(np.array([x, -0.35, 0]), np.array([x, -0.05, 0]), color=color, stroke_width=2)
-            
-            self.play(
-                FadeIn(dot, scale=2), Create(tick),
-                FadeIn(year_label, shift=DOWN * 0.2),
-                FadeIn(desc_label, shift=DOWN * 0.2),
-                run_time=0.5,
-            )
-            dots.add(dot, tick)
-            labels.add(year_label, desc_label)
-            self.wait(wait_times[i])
+        self.play(
+            FadeIn(dot1, scale=2), Create(tick1),
+            FadeIn(year_label1, shift=DOWN * 0.2),
+            FadeIn(desc_label1, shift=DOWN * 0.2),
+            run_time=0.4,
+        )
+        dots.add(dot1, tick1)
+        labels.add(year_label1, desc_label1)
+        
+        # Segment 10 target: 1.52s.
+        # Elapsed: 0.4 (section) + 0.4 (line) + 0.4 (event 1) = 1.20s.
+        # Segment 10 resting wait: 1.52 - 1.20 = 0.32s.
+        self.wait(3.04)
 
-        # At this point, we fade out the timeline and show the forensic/civilian applications
+        # Event 2: Fauld 1880, Event 3: Galton 1888, Event 4: Henry 1899
+        # Segment 11 (56.20s - 62.76s, dur 6.56s)
+        x2, year2, desc2, color2 = events[1]
+        dot2 = Dot(point=np.array([x2, -0.2, 0]), color=color2, radius=0.1)
+        year_label2 = self.ct(year2, font_size=18, color=color2, weight=BOLD)
+        year_label2.next_to(dot2, UP, buff=0.25)
+        desc_label2 = Paragraph(
+            *desc2.split("\n"),
+            font_size=28,
+            color=TEXT_DIM,
+            line_spacing=1.1,
+            alignment="center"
+        ).scale(13 / 28)
+        desc_label2.next_to(year_label2, UP, buff=0.15)
+        tick2 = Line(np.array([x2, -0.35, 0]), np.array([x2, -0.05, 0]), color=color2, stroke_width=2)
+
+        self.play(
+            FadeIn(dot2, scale=2), Create(tick2),
+            FadeIn(year_label2, shift=DOWN * 0.2),
+            FadeIn(desc_label2, shift=DOWN * 0.2),
+            run_time=0.4,
+        )
+        dots.add(dot2, tick2)
+        labels.add(year_label2, desc_label2)
+        self.wait(2.70)
+
+        x3, year3, desc3, color3 = events[2]
+        dot3 = Dot(point=np.array([x3, -0.2, 0]), color=color3, radius=0.1)
+        year_label3 = self.ct(year3, font_size=18, color=color3, weight=BOLD)
+        year_label3.next_to(dot3, UP, buff=0.25)
+        desc_label3 = Paragraph(
+            *desc3.split("\n"),
+            font_size=28,
+            color=TEXT_DIM,
+            line_spacing=1.1,
+            alignment="center"
+        ).scale(13 / 28)
+        desc_label3.next_to(year_label3, UP, buff=0.15)
+        tick3 = Line(np.array([x3, -0.35, 0]), np.array([x3, -0.05, 0]), color=color3, stroke_width=2)
+
+        self.play(
+            FadeIn(dot3, scale=2), Create(tick3),
+            FadeIn(year_label3, shift=DOWN * 0.2),
+            FadeIn(desc_label3, shift=DOWN * 0.2),
+            run_time=0.4,
+        )
+        dots.add(dot3, tick3)
+        labels.add(year_label3, desc_label3)
+        self.wait(2.40)
+
+        x4, year4, desc4, color4 = events[3]
+        dot4 = Dot(point=np.array([x4, -0.2, 0]), color=color4, radius=0.1)
+        year_label4 = self.ct(year4, font_size=18, color=color4, weight=BOLD)
+        year_label4.next_to(dot4, UP, buff=0.25)
+        desc_label4 = Paragraph(
+            *desc4.split("\n"),
+            font_size=28,
+            color=TEXT_DIM,
+            line_spacing=1.1,
+            alignment="center"
+        ).scale(13 / 28)
+        desc_label4.next_to(year_label4, UP, buff=0.15)
+        tick4 = Line(np.array([x4, -0.35, 0]), np.array([x4, -0.05, 0]), color=color4, stroke_width=2)
+
+        self.play(
+            FadeIn(dot4, scale=2), Create(tick4),
+            FadeIn(year_label4, shift=DOWN * 0.2),
+            FadeIn(desc_label4, shift=DOWN * 0.2),
+            run_time=0.4,
+        )
+        dots.add(dot4, tick4)
+        labels.add(year_label4, desc_label4)
+
+        # Gap between Segment 11 & 12 (62.76s - 64.56s, dur 1.80s)
+        self.wait(2.8)
+
+        # Event 5: AFIS 1960s
+        # Segment 12 (64.56s - 68.42s, dur 3.86s)
+        x5, year5, desc5, color5 = events[4]
+        dot5 = Dot(point=np.array([x5, -0.2, 0]), color=color5, radius=0.1)
+        year_label5 = self.ct(year5, font_size=18, color=color5, weight=BOLD)
+        year_label5.next_to(dot5, UP, buff=0.25)
+        desc_label5 = Paragraph(
+            *desc5.split("\n"),
+            font_size=28,
+            color=TEXT_DIM,
+            line_spacing=1.1,
+            alignment="center"
+        ).scale(13 / 28)
+        desc_label5.next_to(year_label5, UP, buff=0.15)
+        tick5 = Line(np.array([x5, -0.35, 0]), np.array([x5, -0.05, 0]), color=color5, stroke_width=2)
+
+        self.play(
+            FadeIn(dot5, scale=2), Create(tick5),
+            FadeIn(year_label5, shift=DOWN * 0.2),
+            FadeIn(desc_label5, shift=DOWN * 0.2),
+            run_time=0.4,
+        )
+        dots.add(dot5, tick5)
+        labels.add(year_label5, desc_label5)
+
+        # Segment 12 duration: 3.86s.
+        # Elapsed: 0.40s.
+        # Segment 12 resting wait: 3.86 - 0.40 = 3.46s.
+        self.wait(3.46)
+        
+        # Gap between Segment 12 & 13 (68.42s - 69.28s, dur 0.86s)
+        # Use this gap to fade out the timeline
         self.play(FadeOut(VGroup(timeline_line, dots, labels)), run_time=0.5)
+        self.wait(0.36)
 
+        # Segment 13 (69.28s - 77.52s, dur 8.24s)
         # 1. Forensic / Criminal Application (FBI) Panel
         forensic_title = self.ct("Ứng Dụng Pháp Y & Hình Sự", font_size=22, color=CHART_ORANGE, weight=BOLD)
         forensic_title.next_to(section, DOWN, buff=0.5)
@@ -436,14 +588,14 @@ class Scene01Intro(Scene):
         self.play(
             FadeIn(forensic_title, shift=DOWN * 0.2),
             FadeIn(fbi_panel, shift=UP * 0.3),
-            run_time=0.5
+            run_time=0.8
         )
         self.wait(2.0)
 
         self.play(
             FadeOut(forensic_title, shift=UP * 0.2),
             FadeOut(fbi_panel, shift=DOWN * 0.2),
-            run_time=0.5
+            run_time=0.6
         )
 
         # 2. Civilian Applications Panel
@@ -487,21 +639,23 @@ class Scene01Intro(Scene):
         
         self.play(
             FadeIn(civil_title, shift=DOWN * 0.2),
-            run_time=0.4
+            run_time=0.5
         )
         self.play(
             LaggedStart(
                 FadeIn(app1_group, shift=UP * 0.3),
                 FadeIn(app2_group, shift=UP * 0.3),
                 FadeIn(app3_group, shift=UP * 0.3),
-                lag_ratio=0.2
+                lag_ratio=0.15
             ),
-            run_time=0.8
+            run_time=1.2
         )
 
-        # Segment 13 duration is 8.24s.
-        # Forensic Panel: 0.5s (fbi in) + 2.0s (fbi wait) + 0.5s (fbi out) = 3.0s
-        # Civilian Panel: 0.4s (civil in) + 0.8s (apps in) + 3.04s (civil wait) + 1.0s (FadeOut) = 5.24s
-        # Total: 3.0s + 5.24s = 8.24s (Exact)
-        self.wait(3.04)
-        self.play(FadeOut(VGroup(section, civil_title, civil_apps)), run_time=1.0)
+        # Segment 13 duration: 8.24s.
+        # Elapsed: 0.8 (fbi in) + 2.0 (wait) + 0.6 (fbi out) + 0.5 (civil title) + 1.2 (apps in) = 5.10s.
+        # Segment 13 resting wait: 8.24 - 5.10 = 3.14s.
+        self.wait(3.14)
+        
+        # Extended resting wait at the end of the scene before final fadeout
+        self.wait(0.5)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
