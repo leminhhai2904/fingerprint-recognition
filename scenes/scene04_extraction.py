@@ -327,7 +327,7 @@ class Scene04Extraction(Scene):
         )
         
         counter_lbl.remove_updater(update_cnt)
-        res_lbl = self.ct("P(C) = +180° (Phát hiện Điểm lõi)", font_size=12, color=MATCH_COLOR, weight=BOLD).next_to(circle_c, DOWN, buff=0.15)
+        res_lbl = self.ct("P(C) = +180° (Phát hiện Điểm lõi)", font_size=12, color=MATCH_COLOR, weight=BOLD).next_to(circle_c, DOWN , buff=0.15)
         
         self.play(
             FadeOut(counter_lbl),
@@ -339,9 +339,9 @@ class Scene04Extraction(Scene):
         # Tổng Segment 6 = 0.8 + 1.5 + 4.0 + 1.2 = 7.50s.
         # Khoảng nghỉ tĩnh (resting wait) trước khi chuyển cảnh:
         # Tổng = 7.50 + wait + 1.0 (FadeOut) = 11.08s -> wait = 2.58s.
-        self.wait(2.58)
-        self.play(FadeOut(Group(*self.mobjects)), run_time=1.0)
-        self.wait(0.8)
+        self.wait(1.38)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=0.6)
+        self.wait(0.4)
 
     def enhancement_pipeline(self):
         """Pipeline xử lý: xám -> tăng cường -> nhị phân -> làm mỏng — Segment 7, 8, 9 = 17.88s."""
@@ -425,7 +425,7 @@ class Scene04Extraction(Scene):
         self.play(FadeOut(scan_group), run_time=0.1)
         
         # Khoảng nghỉ tĩnh (resting wait) để người xem ngắm nhìn toàn bộ quy trình:
-        self.wait(0.6)
+        self.wait(1.4)
         self.play(FadeOut(VGroup(section, stage_groups, arrows, filter_desc)), run_time=0.8)
 
     def crossing_number_extraction(self):
@@ -476,7 +476,7 @@ class Scene04Extraction(Scene):
         self.play(
             Rotate(sweep_circle, angle=2*PI, about_point=p_center.get_center()),
             LaggedStart(*[FadeIn(n, scale=1.4) for n in neighbors], lag_ratio=0.15),
-            run_time=2.8
+            run_time=3.4
         )
         self.play(FadeOut(sweep_circle), FadeIn(cases), run_time=1.0)
         # Chờ nốt Segment 11: 4.76 - 2.8 - 1.0 = 0.96s.
@@ -485,11 +485,9 @@ class Scene04Extraction(Scene):
         # Segment 12: 67.52s -> 71.02s (duration = 3.50s)
         # Giữ lưới Crossing Number trên màn hình và đợi trước khi tắt cảnh
         # 3.50 - 0.8 (FadeOut) = 2.70s.
-        self.wait(2.70)
-        self.play(
-            FadeOut(VGroup(section, formula, grid, grid_lbl, p_center, p_label, neighbors, cases)),
-            run_time=0.8
-        )
+        self.wait(4.0)
+        self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
+        self.wait(0.4)
 
     # ─── MÔ PHỎNG XỬ LÝ ẢNH (ẢNH MINH HỌA ĐƯỜNG VÂN CHO CÁC CARD) ───────────
 
