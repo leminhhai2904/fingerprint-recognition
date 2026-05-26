@@ -76,7 +76,7 @@ class Scene03Features(Scene):
         # Labeling Ridge and Valley
         ridge_lbl = self.ct("Đường vân - Tối", font_size=14, color=TEXT_BRIGHT)
         ridge_lbl.move_to(box.get_top() + UP * 0.45 + LEFT * 0.9)
-        ridge_arrow = Arrow(start=ridge_lbl.get_bottom() + RIGHT * 0.2, end=ridge1.get_center() + UP * 0.1, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
+        ridge_arrow = Arrow(start=ridge_lbl.get_bottom() + RIGHT * 0.2, end=ridge1.get_center() + UP * 0.05, color=PRIMARY, buff=0.1, stroke_width=2, tip_length=0.18)
         
         valley_lbl = self.ct("Rãnh - Sáng", font_size=14, color=TEXT_BRIGHT)
         valley_lbl.move_to(box.get_bottom() + DOWN * 0.45 + RIGHT * 0.9)
@@ -244,7 +244,7 @@ class Scene03Features(Scene):
 
         # Segment 6 starts at 29.16s, Segment 7 starts at 34.26s (Gap = 5.10s).
         # Section (0.8s) + definition (0.8s) + wait (3.50s) = 5.10s.
-        self.wait(3.50)
+        self.wait(2.50)
 
         # ── 1. Card Kết thúc (Termination) ──
         term_box = create_rounded_box(width=3.6, height=3.2, fill_color=CHART_BLUE, fill_opacity=0.06, stroke_color=CHART_BLUE, stroke_width=1.5)
@@ -472,5 +472,5 @@ class Scene03Features(Scene):
 
         # Segment 9 starts at 51.16s, Scene 3 ends at 54.64s (Gap = 3.48s).
         # formula_in (1.0s) + desc_in (0.8s) + legend_in (0.8s) + wait (0.08s) + FadeOut (0.8s) = 3.48s.
-        self.wait(0.08)
+        self.wait(1.28)
         self.play(FadeOut(Group(*self.mobjects)), run_time=0.8)
